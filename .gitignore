@@ -4,3 +4,16 @@ dwl
 *-protocol.h
 .ccls-cache
 config.h
+
+dwl
+dwl.1
+dwl.c
+dwl.desktop
+dwl.o
+pointer-constraints-unstable-v1-protocol.h
+util.c
+util.h
+util.o
+wlr-layer-shell-unstable-v1-protocol.h
+wlr-output-power-management-unstable-v1-protocol.h
+xdg-shell-protocol.h
