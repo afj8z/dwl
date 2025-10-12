@@ -12,6 +12,9 @@ static const float rootcolor[] = COLOR(0x0f0f0fff);
 static const float bordercolor[] = COLOR(0x3f3f3fff);
 static const float focuscolor[] = COLOR(0x7f7f7fff);
 static const float urgentcolor[] = COLOR(0x7f0fefff);
+static const char *cursor_theme = NULL;
+static const char cursor_size[] =
+    "28"; /* Make sure it's a valid integer, otherwise things will break */
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
 static const float fullscreen_bg[] =
