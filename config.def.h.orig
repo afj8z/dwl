@@ -3,18 +3,19 @@
   {((hex >> 24) & 0xFF) / 255.0f, ((hex >> 16) & 0xFF) / 255.0f,               \
    ((hex >> 8) & 0xFF) / 255.0f, (hex & 0xFF) / 255.0f}
 /* appearance */
-static const int sloppyfocus = 1;               /* focus follows mouse */
-static const int bypass_surface_visibility = 0; /* 1 means idle inhibitors will
-          disable idle tracking even if it's surface isn't visible  */
-static const unsigned int borderpx = 2;         /* border pixel of windows */
-static const float rootcolor[] = COLOR(0x0f0f0fff);
-static const float bordercolor[] = COLOR(0x3f3f3fff);
-static const float focuscolor[] = COLOR(0x7f7f7fff);
-static const float urgentcolor[] = COLOR(0x7f0fefff);
+static const int sloppyfocus = 1; /* focus follows mouse */
+static const int bypass_surface_visibility =
+    0; /* 1 means idle inhibitors will disable idle tracking even if it's
+          surface isn't visible  */
+static const unsigned int borderpx = 1; /* border pixel of windows */
+static const float rootcolor[] = COLOR(0x222222ff);
+static const float bordercolor[] = COLOR(0x444444ff);
+static const float focuscolor[] = COLOR(0x005577ff);
+static const float urgentcolor[] = COLOR(0xff0000ff);
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
-static const float fullscreen_bg[] =
-    COLOR(0x1f1f1fff); /* You can also use glsl colors */
+static const float fullscreen_bg[] = {0.0f, 0.0f, 0.0f,
+                                      1.0f}; /* You can also use glsl colors */
 
 /* tagging - TAGCOUNT must be no greater than 31 */
 #define TAGCOUNT (9)
@@ -54,7 +55,7 @@ static const MonitorRule monrules[] = {
     -1,  -1 },
     */
     /* defaults */
-    {NULL, 0.6f, 1, 1.5, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
+    {NULL, 0.55f, 1, 1.675, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
 };
 
 /* keyboard */
@@ -66,8 +67,8 @@ static const struct xkb_rule_names xkb_rules = {
     .options = NULL,
 };
 
-static const int repeat_rate = 25;
-static const int repeat_delay = 400;
+static const int repeat_rate = 35;
+static const int repeat_delay = 300;
 
 /* Trackpad */
 static const int tap_to_click = 1;
@@ -155,7 +156,6 @@ static const Key keys[] = {
     /* modifier                  key                 function argument */
     {MODKEY, XKB_KEY_d, spawn, {.v = menucmd}},
     {MODKEY, XKB_KEY_Return, spawn, {.v = termcmd}},
-    {MODKEY, XKB_KEY_b, togglebar, {0}},
     {MODKEY, XKB_KEY_j, focusstack, {.i = +1}},
     {MODKEY, XKB_KEY_k, focusstack, {.i = -1}},
     {MODKEY, XKB_KEY_i, incnmaster, {.i = +1}},
