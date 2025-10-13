@@ -58,7 +58,7 @@ static const MonitorRule monrules[] = {
     -1,  -1 },
     */
     /* defaults */
-    {NULL, 0.6f, 1, 1.5, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
+    {NULL, 0.6f, 1, 2, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
 };
 
 /* keyboard */
@@ -70,8 +70,8 @@ static const struct xkb_rule_names xkb_rules = {
     .options = NULL,
 };
 
-static const int repeat_rate = 25;
-static const int repeat_delay = 400;
+static const int repeat_rate = 35;
+static const int repeat_delay = 250;
 
 /* Trackpad */
 static const int tap_to_click = 1;
@@ -141,10 +141,14 @@ static const enum libinput_config_tap_button_map button_map =
 /* commands */
 static const char *termcmd[] = {"kitty", "-1", NULL};
 static const char *menucmd[] = {
-    "wmenu-run", "-p",      "run ",    "-f",      "Lilex Nerd Font Mono 16",
+    "wmenu-run", "-p",      "run ",    "-f",      "Lilex Nerd Font Mono 14",
     "-N",        "#101610", "-n",      "#CFD1B6", "-M",
     "#45707a",   "-m",      "#CFD1B6", "-S",      "#45707a",
     "-s",        "#CFD1B6", NULL};
+static const char *bemenucmd[] = {"bemenu-run", "-p", "run ", NULL};
+static const char *bemenucliphist[] = {
+    "sh", "-c", "cliphist list | bemenu -l 10 | cliphist decode | wl-copy",
+    NULL};
 
 /* media controls */
 static const char *volup[] = {
@@ -161,8 +165,13 @@ static const char *lightdown[] = {"brightnessctl", "-e4",        "-n2", "set",
 static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
     /* modifier                  key                 function argument */
-    {MODKEY, XKB_KEY_d, spawn, {.v = menucmd}},
+    {MODKEY, XKB_KEY_d, spawn, {.v = bemenucmd}},
     {MODKEY, XKB_KEY_Return, spawn, {.v = termcmd}},
+    {MODKEY, XKB_KEY_s, spawn, SHCMD("snip.sh")},
+    {MODKEY, XKB_KEY_w, spawn, SHCMD("dmenu-bookmark")},
+    {MODKEY, XKB_KEY_g, spawn, SHCMD("dmenu-webapps")},
+    {MODKEY, XKB_KEY_a, spawn, SHCMD("rofi-system-menu")},
+    {MODKEY, XKB_KEY_v, spawn, {.v = bemenucliphist}},
     {MODKEY, XKB_KEY_b, togglebar, {0}},
     {MODKEY, XKB_KEY_j, focusstack, {.i = +1}},
     {MODKEY, XKB_KEY_k, focusstack, {.i = -1}},
@@ -202,7 +211,8 @@ static const Key keys[] = {
     TAGKEYS(XKB_KEY_9, XKB_KEY_parenleft, 8),
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_Q, quit, {0}},
 
-    /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
+    /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X
+       server */
     {WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_Terminate_Server, quit, {0}},
     {0, XKB_KEY_XF86AudioMute, spawn, {.v = mute}},
     {0, XKB_KEY_XF86AudioLowerVolume, spawn, {.v = voldown}},
