@@ -168,7 +168,7 @@ static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
     /* modifier                  key                 function argument */
     {MODKEY, XKB_KEY_d, spawn, {.v = bemenucmd}},
-    {MODKEY, XKB_KEY_s, spawn, {.v = kittyscratch}},
+    {MODKEY, XKB_KEY_n, spawn, {.v = kittyscratch}},
     {MODKEY, XKB_KEY_Return, spawn, {.v = termcmd}},
     {MODKEY, XKB_KEY_p, spawn, SHCMD("snip.sh")},
     {MODKEY, XKB_KEY_w, spawn, SHCMD("dmenu-bookmark")},
@@ -212,7 +212,7 @@ static const Key keys[] = {
     TAGKEYS(XKB_KEY_7, XKB_KEY_ampersand, 6),
     TAGKEYS(XKB_KEY_8, XKB_KEY_asterisk, 7),
     TAGKEYS(XKB_KEY_9, XKB_KEY_parenleft, 8),
-    TAGKEYS(XKB_KEY_s, XKB_KEY_S, 10),
+    TAGKEYS(XKB_KEY_s, XKB_KEY_S, 9),
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_Q, quit, {0}},
 
     /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X
