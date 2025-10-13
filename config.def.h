@@ -9,16 +9,16 @@ static const int bypass_surface_visibility = 0; /* 1 means idle inhibitors will
 static const unsigned int borderpx = 2;         /* border pixel of windows */
 static const int smartborders = 1;              /* smartborders patch */
 static const float rootcolor[] = COLOR(0x0f0f0fff);
-static const float bordercolor[] = COLOR(0x3f3f3fff);
-static const float focuscolor[] = COLOR(0x7f7f7fff);
-static const float urgentcolor[] = COLOR(0x7f0fefff);
+static const float bordercolor[] = COLOR(0x5D665Dff);
+static const float focuscolor[] = COLOR(0xCFD1B6ff);
+static const float urgentcolor[] = COLOR(0x99453Dff);
 static const char *cursor_theme = NULL;
 static const char cursor_size[] =
     "28"; /* Make sure it's a valid integer, otherwise things will break */
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
 static const float fullscreen_bg[] =
-    COLOR(0x1f1f1fff); /* You can also use glsl colors */
+    COLOR(0x0f0f0fff); /* You can also use glsl colors */
 
 /* tagging - TAGCOUNT must be no greater than 31 */
 #define TAGCOUNT (9)
@@ -140,7 +140,8 @@ static const enum libinput_config_tap_button_map button_map =
 
 /* commands */
 static const char *termcmd[] = {"kitty", "-1", NULL};
-static const char *menucmd[] = {"wmenu-run", NULL};
+static const char *menucmd[] = {
+    "wmenu-run", "-p", "run ", "-f", "Lilex Nerd Font Mono 16", NULL};
 
 /* media controls */
 static const char *volup[] = {
