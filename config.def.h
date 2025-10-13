@@ -141,7 +141,10 @@ static const enum libinput_config_tap_button_map button_map =
 /* commands */
 static const char *termcmd[] = {"kitty", "-1", NULL};
 static const char *menucmd[] = {
-    "wmenu-run", "-p", "run ", "-f", "Lilex Nerd Font Mono 16", NULL};
+    "wmenu-run", "-p",          "run ",    "-f",      "Lilex Nerd Font Mono 16",
+    "-N",        "#101610",     "-n",      "#CFD1B6", "-M",
+    "#45707a",   "-m",          "#CFD1B6", "-S",      "#45707a",
+    "-s",        "#CFD1B6" NULL};
 
 /* media controls */
 static const char *volup[] = {
