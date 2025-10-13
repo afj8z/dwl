@@ -19,7 +19,9 @@ static const char cursor_size[] =
  * behavior */
 static const float fullscreen_bg[] =
     COLOR(0x0f0f0fff); /* You can also use glsl colors */
-
+static const int respect_monitor_reserved_area =
+    0; /* 1 to monitor center while respecting the monitor's reserved area, 0 to
+          monitor center */
 /* tagging - TAGCOUNT must be no greater than 31 */
 #define TAGCOUNT (10)
 
@@ -29,12 +31,14 @@ static int log_level = WLR_ERROR;
 /* NOTE: ALWAYS keep a rule declared even if you don't use rules (e.g leave at
  * least one example) */
 static const Rule rules[] = {
-    /* app_id             title       tags mask     isfloating   monitor */
+    /* app_id             title       tags mask     isfloating   monitor   x y
+        width   height */
     /* examples: */
-    {"Gimp_EXAMPLE", NULL, 0, 1,
-     -1}, /* Start on currently visible tags floating, not tiled */
-    {"firefox_EXAMPLE", NULL, 1 << 8, 0, -1}, /* Start on ONLY tag "9" */
-    {"kitty", "scratchwindow", 1 << 9, 1, -1},
+    {"Gimp_EXAMPLE", NULL, 0, 1, -1, 0, 0, 1000,
+     0.75}, /* Start on currently visible tags floating, not tiled */
+    {"firefox_EXAMPLE", NULL, 1 << 8, 0, -1, 0, 0, 0,
+     0}, /* Start on ONLY tag "9" */
+    {"kitty", "scratchwindow", 1 << 9, 1, -1, 0, 0, 400, 200},
 };
 
 /* layout(s) */
