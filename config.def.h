@@ -21,7 +21,7 @@ static const float fullscreen_bg[] =
     COLOR(0x0f0f0fff); /* You can also use glsl colors */
 
 /* tagging - TAGCOUNT must be no greater than 31 */
-#define TAGCOUNT (9)
+#define TAGCOUNT (10)
 
 /* logging */
 static int log_level = WLR_ERROR;
@@ -34,6 +34,7 @@ static const Rule rules[] = {
     {"Gimp_EXAMPLE", NULL, 0, 1,
      -1}, /* Start on currently visible tags floating, not tiled */
     {"firefox_EXAMPLE", NULL, 1 << 8, 0, -1}, /* Start on ONLY tag "9" */
+    {"kitty", "scratchwindow", 1 << 9, 1, -1},
 };
 
 /* layout(s) */
@@ -149,6 +150,7 @@ static const char *bemenucmd[] = {"bemenu-run", "-p", "run ", NULL};
 static const char *bemenucliphist[] = {
     "sh", "-c", "cliphist list | bemenu -l 10 | cliphist decode | wl-copy",
     NULL};
+static const char *kittyscratch[] = {"kitty", "--title", "scratchwindow", NULL};
 
 /* media controls */
 static const char *volup[] = {
@@ -166,8 +168,9 @@ static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
     /* modifier                  key                 function argument */
     {MODKEY, XKB_KEY_d, spawn, {.v = bemenucmd}},
+    {MODKEY, XKB_KEY_s, spawn, {.v = kittyscratch}},
     {MODKEY, XKB_KEY_Return, spawn, {.v = termcmd}},
-    {MODKEY, XKB_KEY_s, spawn, SHCMD("snip.sh")},
+    {MODKEY, XKB_KEY_p, spawn, SHCMD("snip.sh")},
     {MODKEY, XKB_KEY_w, spawn, SHCMD("dmenu-bookmark")},
     {MODKEY, XKB_KEY_g, spawn, SHCMD("dmenu-webapps")},
     {MODKEY, XKB_KEY_a, spawn, SHCMD("rofi-system-menu")},
@@ -176,7 +179,7 @@ static const Key keys[] = {
     {MODKEY, XKB_KEY_j, focusstack, {.i = +1}},
     {MODKEY, XKB_KEY_k, focusstack, {.i = -1}},
     {MODKEY, XKB_KEY_i, incnmaster, {.i = +1}},
-    {MODKEY, XKB_KEY_p, incnmaster, {.i = -1}},
+    {MODKEY, XKB_KEY_o, incnmaster, {.i = -1}},
     {MODKEY, XKB_KEY_h, setmfact, {.f = -0.05f}},
     {MODKEY, XKB_KEY_l, setmfact, {.f = +0.05f}},
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_Return, zoom, {0}},
@@ -209,6 +212,7 @@ static const Key keys[] = {
     TAGKEYS(XKB_KEY_7, XKB_KEY_ampersand, 6),
     TAGKEYS(XKB_KEY_8, XKB_KEY_asterisk, 7),
     TAGKEYS(XKB_KEY_9, XKB_KEY_parenleft, 8),
+    TAGKEYS(XKB_KEY_s, XKB_KEY_S, 10),
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_Q, quit, {0}},
 
     /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X
