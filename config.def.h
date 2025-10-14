@@ -38,7 +38,7 @@ static const Rule rules[] = {
      0.75}, /* Start on currently visible tags floating, not tiled */
     {"firefox_EXAMPLE", NULL, 1 << 8, 0, -1, 0, 0, 0,
      0}, /* Start on ONLY tag "9" */
-    {"kitty", "scratchwindow", 1 << 9, 1, -1, 0, 0, 400, 200},
+    {"kitty", "scratchwindow", 1 << 9, 1, -1, 500, 500, 500, 800},
 };
 
 /* layout(s) */
@@ -154,7 +154,15 @@ static const char *bemenucmd[] = {"bemenu-run", "-p", "run ", NULL};
 static const char *bemenucliphist[] = {
     "sh", "-c", "cliphist list | bemenu -l 10 | cliphist decode | wl-copy",
     NULL};
-static const char *kittyscratch[] = {"kitty", "--title", "scratchwindow", NULL};
+static const char *kittyscratch[] = {"kitty",
+                                     "--title",
+                                     "scratchwindow",
+                                     "-e",
+                                     "nvim",
+                                     "-u",
+                                     "~/.config/scratchpad/init.lu",
+                                     "~/documents/notes/scratch.md",
+                                     NULL};
 
 /* media controls */
 static const char *volup[] = {
