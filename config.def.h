@@ -14,7 +14,7 @@ static const float focuscolor[] = COLOR(0xCFD1B6ff);
 static const float urgentcolor[] = COLOR(0x99453Dff);
 static const char *cursor_theme = NULL;
 static const char cursor_size[] =
-    "28"; /* Make sure it's a valid integer, otherwise things will break */
+    "34"; /* Make sure it's a valid integer, otherwise things will break */
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
 static const float fullscreen_bg[] =
@@ -23,7 +23,7 @@ static const int respect_monitor_reserved_area =
     0; /* 1 to monitor center while respecting the monitor's reserved area, 0 to
           monitor center */
 /* tagging - TAGCOUNT must be no greater than 31 */
-#define TAGCOUNT (10)
+#define TAGCOUNT (11)
 
 /* logging */
 static int log_level = WLR_ERROR;
@@ -38,7 +38,8 @@ static const Rule rules[] = {
      0.75}, /* Start on currently visible tags floating, not tiled */
     {"firefox_EXAMPLE", NULL, 1 << 8, 0, -1, 0, 0, 0,
      0}, /* Start on ONLY tag "9" */
-    {"kitty", "scratchwindow", 1 << 9, 1, -1, 500, 500, 500, 800},
+    {"kitty", "scratchwindow", 1 << 9, 1, -1, 500, 150, 600, 800},
+    {NULL, "Typst Preview — Mozilla Firefox", 1 << 10, 0, -1, 0, 0, 0, 0},
 };
 
 /* layout(s) */
@@ -160,7 +161,7 @@ static const char *kittyscratch[] = {"kitty",
                                      "-e",
                                      "nvim",
                                      "-u",
-                                     "~/.config/scratchpad/init.lu",
+                                     "~/.config/scratchpad/init.lua",
                                      "~/documents/notes/scratch.md",
                                      NULL};
 
@@ -182,7 +183,7 @@ static const Key keys[] = {
     {MODKEY, XKB_KEY_d, spawn, {.v = bemenucmd}},
     {MODKEY, XKB_KEY_n, spawn, {.v = kittyscratch}},
     {MODKEY, XKB_KEY_Return, spawn, {.v = termcmd}},
-    {MODKEY, XKB_KEY_p, spawn, SHCMD("snip.sh")},
+    {MODKEY, XKB_KEY_c, spawn, SHCMD("snip.sh")},
     {MODKEY, XKB_KEY_w, spawn, SHCMD("dmenu-bookmark")},
     {MODKEY, XKB_KEY_g, spawn, SHCMD("dmenu-webapps")},
     {MODKEY, XKB_KEY_a, spawn, SHCMD("rofi-system-menu")},
@@ -225,6 +226,7 @@ static const Key keys[] = {
     TAGKEYS(XKB_KEY_8, XKB_KEY_asterisk, 7),
     TAGKEYS(XKB_KEY_9, XKB_KEY_parenleft, 8),
     TAGKEYS(XKB_KEY_s, XKB_KEY_S, 9),
+    TAGKEYS(XKB_KEY_p, XKB_KEY_P, 10),
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_Q, quit, {0}},
 
     /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X
