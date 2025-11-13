@@ -8,51 +8,17 @@ static const int bypass_surface_visibility = 0; /* 1 means idle inhibitors will
           disable idle tracking even if it's surface isn't visible  */
 static const unsigned int borderpx = 2;         /* border pixel of windows */
 static const int smartborders = 1;              /* smartborders patch */
-static const float rootcolor[] = COLOR(0x111012ff);
-static const float bordercolor[] = COLOR(0x595466ff);
-static const float focuscolor[] = COLOR(0xDBD0C6ff);
-static const float urgentcolor[] = COLOR(0xC76B6Bff);
+static const float rootcolor[] = COLOR(0x0f0f0fff);
+static const float bordercolor[] = COLOR(0x5D665Dff);
+static const float focuscolor[] = COLOR(0xCFD1B6ff);
+static const float urgentcolor[] = COLOR(0x99453Dff);
 static const char *cursor_theme = NULL;
 static const char cursor_size[] =
     "34"; /* Make sure it's a valid integer, otherwise things will break */
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
-static const float fullscreen_bg[] = {0.1f, 0.1f, 0.1f,
-                                      0.0f}; /* You can also use glsl colors */
-
-static const int opacity = 0; /* flag to enable opacity */
-static const float opacity_inactive = 0.8;
-static const float opacity_active = 1.0;
-
-static const int shadow = 0; /* flag to enable shadow */
-static const int shadow_only_floating =
-    0; /* only apply shadow to floating windows */
-static const float shadow_color[4] = COLOR(0x0000FFff);
-static const float shadow_color_focus[4] = COLOR(0xFF0000ff);
-static const int shadow_blur_sigma = 20;
-static const int shadow_blur_sigma_focus = 40;
-static const char *const shadow_ignore_list[] = {
-    NULL}; /* list of app-id to ignore */
-
-static const int corner_radius = 0;       /* 0 disables corner_radius */
-static const int corner_radius_inner = 0; /* 0 disables corner_radius */
-static const int corner_radius_only_floating =
-    0; /* only apply corner_radius and corner_radius_inner to floating windows
-        */
-
-static const int blur = 0;      /* flag to enable blur */
-static const int blur_xray = 0; /* flag to make transparent fs and floating
-                                   windows display your background */
-static const int blur_ignore_transparent = 1;
-static const struct blur_data blur_data = {
-    .radius = 5,
-    .num_passes = 2,
-    .noise = (float)0.02,
-    .brightness = (float)0.9,
-    .contrast = (float)0.9,
-    .saturation = (float)1.1,
-};
-
+static const float fullscreen_bg[] =
+    COLOR(0x0f0f0fff); /* You can also use glsl colors */
 static const int respect_monitor_reserved_area =
     0; /* 1 to monitor center while respecting the monitor's reserved area, 0 to
           monitor center */
@@ -73,7 +39,7 @@ static const Rule rules[] = {
     {"firefox_EXAMPLE", NULL, 1 << 8, 0, -1, 0, 0, 0,
      0}, /* Start on ONLY tag "9" */
     {"kitty", "scratchwindow", 1 << 9, 1, -1, 500, 150, 600, 800},
-    {"firefox", "Typst Preview — Mozilla Firefox ", 1 << 10, 0, -1, 0, 0, 0, 0},
+    {NULL, "Typst Preview — Mozilla Firefox", 1 << 10, 0, -1, 0, 0, 0, 0},
 };
 
 /* layout(s) */
@@ -107,10 +73,11 @@ static const struct xkb_rule_names xkb_rules = {
     /* example:
     .options = "ctrl:nocaps",
     */
-    .options = "compose:menu"};
+    .options = NULL,
+};
 
-static const int repeat_rate = 30;
-static const int repeat_delay = 225;
+static const int repeat_rate = 35;
+static const int repeat_delay = 250;
 
 /* Trackpad */
 static const int tap_to_click = 1;
@@ -179,6 +146,11 @@ static const enum libinput_config_tap_button_map button_map =
 
 /* commands */
 static const char *termcmd[] = {"kitty", "-1", NULL};
+static const char *menucmd[] = {
+    "wmenu-run", "-p",      "run ",    "-f",      "Lilex Nerd Font Mono 14",
+    "-N",        "#101610", "-n",      "#CFD1B6", "-M",
+    "#45707a",   "-m",      "#CFD1B6", "-S",      "#45707a",
+    "-s",        "#CFD1B6", NULL};
 static const char *bemenucmd[] = {"bemenu-run", "-p", "run ", NULL};
 static const char *bemenucliphist[] = {
     "sh", "-c", "cliphist list | bemenu -l 10 | cliphist decode | wl-copy",
