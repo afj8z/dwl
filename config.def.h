@@ -73,6 +73,7 @@ static const Rule rules[] = {
     {"firefox_EXAMPLE", NULL, 1 << 8, 0, -1, 0, 0, 0,
      0}, /* Start on ONLY tag "9" */
     {"kitty", "scratchwindow", 1 << 9, 1, -1, 500, 150, 600, 800},
+    {"kitty", "floating-term", 0, 1, -1, 500, 150, 600, 400},
     {"firefox", "Typst Preview — Mozilla Firefox ", 1 << 10, 0, -1, 0, 0, 0, 0},
 };
 
@@ -210,6 +211,7 @@ static const Key keys[] = {
     /* modifier                  key                 function argument */
     {MODKEY, XKB_KEY_d, spawn, {.v = bemenucmd}},
     {MODKEY, XKB_KEY_n, spawn, {.v = kittyscratch}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_A, spawn, SHCMD("dmenu-prompts")},
     {MODKEY, XKB_KEY_Return, spawn, {.v = termcmd}},
     {MODKEY, XKB_KEY_c, spawn, SHCMD("snip.sh")},
     {MODKEY, XKB_KEY_w, spawn, SHCMD("dmenu-bookmark")},
