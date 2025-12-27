@@ -3765,28 +3765,6 @@ void iter_xdg_scene_buffers(struct wlr_scene_buffer *buffer, int sx, int sy,
   }
 }
 
-void iter_xdg_scene_buffers_blur(struct wlr_scene_buffer *buffer, int sx,
-                                 int sy, void *user_data) {
-  Client *c = user_data;
-  struct wlr_scene_surface *scene_surface =
-      wlr_scene_surface_try_from_buffer(buffer);
-  struct wlr_xdg_surface *xdg_surface;
-
-  if (!scene_surface) {
-    return;
-  }
-
-  xdg_surface = wlr_xdg_surface_try_from_wlr_surface(scene_surface->surface);
-
-  if (c && xdg_surface && xdg_surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL) {
-    if (!wlr_subsurface_try_from_wlr_surface(xdg_surface->surface)) {
-      if (blur) {
-        int blur_optimized = !c->isfloating || blur_xray;
-        wlr_scene_buffer_set_backdrop_blur_optimized(buffer, blur_optimized);
-      }
-    }
-  }
-}
 
 void iter_xdg_scene_buffers_opacity(struct wlr_scene_buffer *buffer, int sx,
                                     int sy, void *user_data) {
