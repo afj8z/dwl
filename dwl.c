@@ -3761,13 +3761,6 @@ void iter_xdg_scene_buffers(struct wlr_scene_buffer *buffer, int sx, int sy,
     if (!wlr_subsurface_try_from_wlr_surface(xdg_surface->surface)) {
       update_buffer_corner_radius(c, buffer);
 
-      if (blur) {
-        int blur_optimized = !c->isfloating || blur_xray;
-        wlr_scene_buffer_set_backdrop_blur(buffer, 1);
-        wlr_scene_buffer_set_backdrop_blur_optimized(buffer, blur_optimized);
-        wlr_scene_buffer_set_backdrop_blur_ignore_transparent(
-            buffer, blur_ignore_transparent);
-      }
     }
   }
 }
