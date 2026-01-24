@@ -66,7 +66,7 @@ static const MonitorRule monrules[] = {
     -1,  -1 },
     */
     /* defaults */
-    {NULL, 0.5f, 1, 1.5, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
+    {NULL, 0.5f, 1, 1, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
 };
 
 /* keyboard */
@@ -168,10 +168,8 @@ static const char *voldown[] = {
     "wpctl", "set-volume", "-l", "1", "@DEFAULT_AUDIO_SINK@", "5%-", NULL};
 static const char *mute[] = {"wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@",
                              "toggle", NULL};
-static const char *lightup[] = {"brightnessctl", "-e4",        "-n2", "set",
-                                "5%+",           ">/dev/null", NULL};
-static const char *lightdown[] = {"brightnessctl", "-e4",        "-n2", "set",
-                                  "5%-",           ">/dev/null", NULL};
+static const char *lightup[] = {"notify-med", "bright_up", NULL};
+static const char *lightdown[] = {"notify-med", "bright_down",  NULL};
 
 static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */

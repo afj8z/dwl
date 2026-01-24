@@ -526,7 +526,6 @@ static struct zdwl_ipc_output_v2_interface dwl_output_implementation = {
     .set_layout = dwl_ipc_output_set_layout,
     .set_client_tags = dwl_ipc_output_set_client_tags};
 
-
 #ifdef XWAYLAND
 static void activatex11(struct wl_listener *listener, void *data);
 static void associatex11(struct wl_listener *listener, void *data);
@@ -635,7 +634,6 @@ void arrange(Monitor *m) {
 
   wlr_scene_node_set_enabled(&m->fullscreen_bg->node,
                              (c = focustop(m)) && c->isfullscreen);
-
 
   strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, LENGTH(m->ltsymbol));
 
@@ -1060,7 +1058,6 @@ void commitlayersurfacenotify(struct wl_listener *listener, void *data) {
   }
 
   arrangelayers(l->mon);
-
 }
 
 void commitnotify(struct wl_listener *listener, void *data) {
@@ -1326,7 +1323,6 @@ void createmon(struct wl_listener *listener, void *data) {
   /* updatemons() will resize and set correct position */
   m->fullscreen_bg = wlr_scene_rect_create(layers[LyrFS], 0, 0, fullscreen_bg);
   wlr_scene_node_set_enabled(&m->fullscreen_bg->node, 0);
-
 
   /* Adds this to the output layout in the order it was configured.
    *
@@ -2706,7 +2702,6 @@ void resize(Client *c, struct wlr_box geo, int interact, int draw_borders) {
       client_set_size(c, c->geom.width - 2 * c->bw, c->geom.height - 2 * c->bw);
   client_get_clip(c, &clip);
   wlr_scene_subsurface_tree_set_clip(&c->scene_surface->node, &clip);
-
 }
 
 void run(char *startup_cmd) {
@@ -2803,7 +2798,6 @@ void setfloating(Client *c, int floating) {
   Client *p = client_get_parent(c);
   c->isfloating = floating;
 
-
   /* If in floating layout do not change the client's layer */
   if (!c->mon || !client_surface(c)->mapped ||
       !c->mon->lt[c->mon->sellt]->arrange)
@@ -2836,7 +2830,6 @@ void setfullscreen(Client *c, int fullscreen) {
      * client positions are set by the user and cannot be recalculated */
     resize(c, c->prev, 0, 1);
   }
-
 
   arrange(c->mon);
   printstatus();
@@ -2950,7 +2943,6 @@ void setup(void) {
     layers[i] = wlr_scene_tree_create(&scene->tree);
   drag_icon = wlr_scene_tree_create(&scene->tree);
   wlr_scene_node_place_below(&drag_icon->node, &layers[LyrBlock]->node);
-
 
   /* Autocreates a renderer, either Pixman, GLES2 or Vulkan for us. The user
    * can also specify a renderer using the WLR_RENDERER env var.
@@ -3416,7 +3408,6 @@ void updatemons(struct wl_listener *listener, void *data) {
     wlr_scene_node_set_position(&m->fullscreen_bg->node, m->m.x, m->m.y);
     wlr_scene_rect_set_size(m->fullscreen_bg, m->m.width, m->m.height);
 
-
     if (m->lock_surface) {
       struct wlr_scene_tree *scene_tree = m->lock_surface->surface->data;
       wlr_scene_node_set_position(&scene_tree->node, m->m.x, m->m.y);
@@ -3485,7 +3476,6 @@ void urgent(struct wl_listener *listener, void *data) {
 
   if (client_surface(c)->mapped) {
     client_set_border_color(c, urgentcolor);
-
   }
 }
 
@@ -3604,8 +3594,6 @@ void zoom(const Arg *arg) {
   focusclient(sel, 1);
   arrange(selmon);
 }
-
-
 
 #ifdef XWAYLAND
 void activatex11(struct wl_listener *listener, void *data) {
