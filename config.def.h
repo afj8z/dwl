@@ -17,14 +17,16 @@ static const float urgentcolor[] = COLOR(0xff0000ff);
 static const float fullscreen_bg[] = {0.1f, 0.1f, 0.1f,
                                       0.0f}; /* You can also use glsl colors */
 
-
 /* VANITYGAPS PATCH */
-static const int smartgaps                 = 0;  /* 1 means no outer gap when there is only one window */
-static const int monoclegaps               = 0;  /* 1 means outer gaps in monocle layout */
-static const unsigned int gappih           = 10; /* horiz inner gap between windows */
-static const unsigned int gappiv           = 10; /* vert inner gap between windows */
-static const unsigned int gappoh           = 10; /* horiz outer gap between windows and screen edge */
-static const unsigned int gappov           = 10; /* vert outer gap between windows and screen edge */
+static const int smartgaps =
+    0; /* 1 means no outer gap when there is only one window */
+static const int monoclegaps = 0; /* 1 means outer gaps in monocle layout */
+static const unsigned int gappih = 10; /* horiz inner gap between windows */
+static const unsigned int gappiv = 10; /* vert inner gap between windows */
+static const unsigned int gappoh =
+    10; /* horiz outer gap between windows and screen edge */
+static const unsigned int gappov =
+    10; /* vert outer gap between windows and screen edge */
 /* VANITYGAPS PATCH END */
 
 /* SCENEFX PATCH */
@@ -39,7 +41,7 @@ static const float shadow_color_focus[4] = COLOR(0xFF0000ff);
 static const int shadow_blur_sigma = 20;
 static const int shadow_blur_sigma_focus = 40;
 static const char *const shadow_ignore_list[] = {
-    NULL}; /* list of app-id to ignore */
+    NULL};                                /* list of app-id to ignore */
 static const int corner_radius = 8;       /* 0 disables corner_radius */
 static const int corner_radius_inner = 9; /* 0 disables corner_radius */
 static const int corner_radius_only_floating =
@@ -206,30 +208,33 @@ static const Key keys[] = {
     {MODKEY, XKB_KEY_f, setlayout, {.v = &layouts[1]}},
     {MODKEY, XKB_KEY_m, setlayout, {.v = &layouts[2]}},
     {MODKEY, XKB_KEY_space, setlayout, {0}},
+    {MODKEY, XKB_KEY_b, togglebar, {0}},
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_space, togglefloating, {0}},
     {MODKEY, XKB_KEY_e, togglefullscreen, {0}},
     // {MODKEY, XKB_KEY_0, view, {.ui = ~0}},
 
+    /* VANITYGAPS PATCH KEYS */
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, incgaps, {.i = +1}},
+    {MODKEY | WLR_MODIFIER_LOGO, XKB_KEY_g, incgaps, {.i = -1}},
+    // { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_H, incogaps, {.i
+    // = +1 } }, { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_L,
+    // incogaps,      {.i = -1 } }, {
+    // MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_h,      incigaps,
+    // {.i = +1 } }, { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_l,
+    // incigaps,      {.i = -1 } },
+    {MODKEY, XKB_KEY_0, togglegaps, {0}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, defaultgaps, {0}},
+    // { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1
+    // } }, { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i
+    // = -1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incivgaps, {.i
+    // = +1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o,          incivgaps, {.i
+    // = -1 } }, { MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_y,          incohgaps, {.i
+    // = +1 } }, { MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_o,          incohgaps, {.i
+    // = -1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps, {.i
+    // = +1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incovgaps, {.i
+    // = -1 } },
 
-/* VANITYGAPS PATCH KEYS */
-	{ MODKEY|WLR_MODIFIER_SHIFT,  XKB_KEY_G,          incgaps,       {.i = +1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_g,          incgaps,       {.i = -1 } },
-	// { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_H,      incogaps,      {.i = +1 } },
-	// { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_L,      incogaps,      {.i = -1 } },
-	// { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_h,      incigaps,      {.i = +1 } },
-	// { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_l,      incigaps,      {.i = -1 } },
-	{ MODKEY,  XKB_KEY_0,          togglegaps,     {0} },
-	{ MODKEY|WLR_MODIFIER_SHIFT,   XKB_KEY_parenright,defaultgaps,    {0} },
-	// { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1 } },
-	// { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i = -1 } },
-	// { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incivgaps,     {.i = +1 } },
-	// { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o,          incivgaps,     {.i = -1 } },
-	// { MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_y,          incohgaps,     {.i = +1 } },
-	// { MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_o,          incohgaps,     {.i = -1 } },
-	// { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps,     {.i = +1 } },
-	// { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incovgaps,     {.i = -1 } },
-
-/* VANITYGAPS PATCH KEYS END */
+    /* VANITYGAPS PATCH KEYS END */
 
     // media control
     {0, XKB_KEY_XF86AudioMute, spawn, {.v = mute}},
