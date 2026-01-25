@@ -24,8 +24,7 @@ dwl.o: dwl.c client.h config.h config.mk cursor-shape-v1-protocol.h \
 	wlr-output-power-management-unstable-v1-protocol.h \
 	xdg-shell-protocol.h \
 	river-control-unstable-v1-protocol.h river-control-unstable-v1-private-protocol.c river-control.h \
-	dwlctl
-	dwl-ipc-unstable-v2-protocol.h
+	dwlctl dwl-ipc-unstable-v2-protocol.h
 util.o: util.c util.h
 #if there is a cleaner way of doing this please inform me this looks a little ugly
 dwlctl: river-control-unstable-v1-client-protocol.h river-control-unstable-v1-private-protocol.c river-control-unstable-v1-private-protocol.o dwlctl.c
