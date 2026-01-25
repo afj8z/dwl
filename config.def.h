@@ -7,11 +7,11 @@ static const int sloppyfocus = 1; /* focus follows mouse */
 static const int bypass_surface_visibility =
     0; /* 1 means idle inhibitors will disable idle tracking even if it's
           surface isn't visible  */
-static const unsigned int borderpx = 1; /* border pixel of windows */
+static unsigned int borderpx = 1; /* border pixel of windows */
 static const float rootcolor[] = COLOR(0x222222ff);
-static const float bordercolor[] = COLOR(0x444444ff);
-static const float focuscolor[] = COLOR(0x005577ff);
-static const float urgentcolor[] = COLOR(0xff0000ff);
+static float bordercolor[] = COLOR(0x444444ff);
+static float focuscolor[] = COLOR(0x005577ff);
+static float urgentcolor[] = COLOR(0xff0000ff);
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
 static const float fullscreen_bg[] = {0.1f, 0.1f, 0.1f,
@@ -67,7 +67,9 @@ static const struct blur_data blur_data = {
 /* logging */
 static int log_level = WLR_ERROR;
 
-static const Rule rules[] = {
+#define USE_RULES
+#define NEW_RULES_OVERRIDE
+static Rule rules[] = {
     /* app_id             title       tags mask     isfloating   monitor */
     {"Gimp_EXAMPLE", NULL, 0, 1,
      -1}, /* Start on currently visible tags floating, not tiled */
@@ -188,7 +190,12 @@ static const char *mute[] = {"wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@",
 static const char *lightup[] = {"notify-med", "bright_up", NULL};
 static const char *lightdown[] = {"notify-med", "bright_down", NULL};
 
-static const Key keys[] = {
+/* note keys gets cleared with riverctl clear-binds but the keys_always are
+ * excluded from being cleared this is to have a list of fallback keybinds if
+ * your riverctl script fails if you won't like to have keys[] declared
+ * commented out the KEYS_USED macro bellow to disable the functionality*/
+#define KEYS_USED
+static Key keys[] = {
     /* Note that Shift changes certain key codes: 2 -> at, etc. */
     /* modifier                  key                  function          argument
      */
@@ -262,8 +269,9 @@ static const Key keys[] = {
     TAGKEYS(XKB_KEY_7, XKB_KEY_ampersand, 6),
     TAGKEYS(XKB_KEY_8, XKB_KEY_asterisk, 7),
     TAGKEYS(XKB_KEY_9, XKB_KEY_parenleft, 8),
+};
+static Key keys_always[] = {
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_q, quit, {0}},
-
     /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
     {WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_Terminate_Server, quit, {0}},
 /* Ctrl-Alt-Fx is used to switch to another VT, if you don't know what a VT is
