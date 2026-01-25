@@ -21,9 +21,16 @@ dwl: dwl.o util.o dwl-ipc-unstable-v2-protocol.o
 	$(CC) dwl.o util.o dwl-ipc-unstable-v2-protocol.o $(DWLCFLAGS) $(LDFLAGS) $(LDLIBS) -o $@
 dwl.o: dwl.c client.h config.h config.mk cursor-shape-v1-protocol.h \
 	pointer-constraints-unstable-v1-protocol.h wlr-layer-shell-unstable-v1-protocol.h \
-	wlr-output-power-management-unstable-v1-protocol.h xdg-shell-protocol.h \
+	wlr-output-power-management-unstable-v1-protocol.h \
+	xdg-shell-protocol.h \
+	river-control-unstable-v1-protocol.h river-control-unstable-v1-private-protocol.c river-control.h \
+	dwlctl
 	dwl-ipc-unstable-v2-protocol.h
 util.o: util.c util.h
+#if there is a cleaner way of doing this please inform me this looks a little ugly
+dwlctl: river-control-unstable-v1-client-protocol.h river-control-unstable-v1-private-protocol.c river-control-unstable-v1-private-protocol.o dwlctl.c
+	$(CC) -c -o $@.o dwlctl.c 
+	$(CC) -lwayland-client -o $@ dwlctl.o river-control-unstable-v1-private-protocol.o
 dwl-ipc-unstable-v2-protocol.o: dwl-ipc-unstable-v2-protocol.c dwl-ipc-unstable-v2-protocol.h
 
 # wayland-scanner is a tool which generates C headers and rigging for Wayland
@@ -32,6 +39,17 @@ dwl-ipc-unstable-v2-protocol.o: dwl-ipc-unstable-v2-protocol.c dwl-ipc-unstable-
 WAYLAND_SCANNER   = `$(PKG_CONFIG) --variable=wayland_scanner wayland-scanner`
 WAYLAND_PROTOCOLS = `$(PKG_CONFIG) --variable=pkgdatadir wayland-protocols`
 
+river-control-unstable-v1-client-protocol.h:
+	$(WAYLAND_SCANNER) client-header \
+		protocols/river-control-unstable-v1.xml  $@
+river-control-unstable-v1-protocol.h:
+	$(WAYLAND_SCANNER) server-header \
+		protocols/river-control-unstable-v1.xml  $@
+river-control-unstable-v1-private-protocol.c:
+	$(WAYLAND_SCANNER) private-code \
+		protocols/river-control-unstable-v1.xml  $@
+river-control-unstable-v1-private-protocol.o:
+	$(CC) -c -o $@ river-control-unstable-v1-private-protocol.c
 cursor-shape-v1-protocol.h:
 	$(WAYLAND_SCANNER) enum-header \
 		$(WAYLAND_PROTOCOLS)/staging/cursor-shape/cursor-shape-v1.xml $@
@@ -56,7 +74,7 @@ dwl-ipc-unstable-v2-protocol.c:
 config.h:
 	cp config.def.h $@
 clean:
-	rm -f dwl *.o *-protocol.h
+	rm -f dwl *.o *-protocol.h *-protocol.c
 
 dist: clean
 	mkdir -p dwl-$(VERSION)

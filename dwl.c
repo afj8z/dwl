@@ -181,7 +181,7 @@ typedef struct {
   uint32_t mod;
   xkb_keysym_t keysym;
   void (*func)(const Arg *);
-  const Arg arg;
+  Arg arg;
 } Key;
 
 typedef struct {
@@ -563,6 +563,9 @@ static struct wlr_xwayland *xwayland;
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
+/* river control */
+#include "river-control.h"
+
 /* attempt to encapsulate suck into one file */
 #include "client.h"
 
@@ -587,13 +590,15 @@ void applyrules(Client *c) {
   const char *appid, *title;
   uint32_t newtags = 0;
   int i;
+  const Rule_linked *rl;
   const Rule *r;
   Monitor *mon = selmon, *m;
 
   appid = client_get_appid(c);
   title = client_get_title(c);
 
-  for (r = rules; r < END(rules); r++) {
+  wl_list_for_each(rl, &rules_list, link) {
+    r = rl->rule;
     if ((!r->title || strstr(title, r->title)) &&
         (!r->id || strstr(appid, r->id))) {
       c->isfloating = r->isfloating;
@@ -1926,17 +1931,35 @@ void inputdevice(struct wl_listener *listener, void *data) {
   wlr_seat_set_capabilities(seat, caps);
 }
 
+inline bool keybinding_key(uint32_t mods, xkb_keysym_t sym, const Key *k) {
+  if (CLEANMASK(mods) == CLEANMASK(k->mod) && sym == k->keysym && k->func) {
+    k->func(&k->arg);
+    return true;
+  }
+  return false;
+}
+
 int keybinding(uint32_t mods, xkb_keysym_t sym) {
   /*
    * Here we handle compositor keybindings. This is when the compositor is
    * processing keys, rather than passing them on to the client for its own
    * processing.
    */
+  const Key_linked *kl;
   const Key *k;
-  for (k = keys; k < END(keys); k++) {
-    if (CLEANMASK(mods) == CLEANMASK(k->mod) &&
-        xkb_keysym_to_lower(sym) == xkb_keysym_to_lower(k->keysym) && k->func) {
-      k->func(&k->arg);
+  Mode *new_mode_if_oneshot = active_mode->oneshot_mode;
+
+  wl_list_for_each(kl, &active_mode->linked_keys, link) {
+    k = kl->key;
+    if (keybinding_key(mods, sym, k) == true) {
+      if (new_mode_if_oneshot != NULL) {
+        active_mode = new_mode_if_oneshot;
+      }
+      return 1;
+    }
+  }
+  for (k = keys_always; k < END(keys_always); k++) {
+    if (keybinding_key(mods, sym, k) == true) {
       return 1;
     }
   }
@@ -2996,6 +3019,9 @@ void setup(void) {
   wl_signal_add(&output_mgr->events.apply, &output_mgr_apply);
   wl_signal_add(&output_mgr->events.test, &output_mgr_test);
 
+  wl_global_create(dpy, &zriver_control_v1_interface, 1, NULL,
+                   zriver_control_handle_bind);
+
   wl_global_create(dpy, &zdwl_ipc_manager_v2_interface, 2, NULL,
                    dwl_ipc_manager_bind);
 
@@ -3805,6 +3831,9 @@ void xwaylandready(struct wl_listener *listener, void *data) {
 int main(int argc, char *argv[]) {
   char *startup_cmd = NULL;
   int c;
+
+  setup_binds();
+  setup_rules();
 
   while ((c = getopt(argc, argv, "s:hdv")) != -1) {
     if (c == 's')
