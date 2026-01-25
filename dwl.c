@@ -2548,8 +2548,12 @@ void setup(void) {
         scene, wlr_linux_dmabuf_v1_create_with_renderer(dpy, 5, drw));
   }
 
-  if ((drm_fd = wlr_renderer_get_drm_fd(drw)) >= 0 && drw->features.timeline &&
-      backend->features.timeline)
+  // if ((drm_fd = wlr_renderer_get_drm_fd(drw)) >= 0 && drw->features.timeline
+  // &&
+  //     backend->features.timeline)
+  //   wlr_linux_drm_syncobj_manager_v1_create(dpy, 1, drm_fd);
+
+  if ((drm_fd = wlr_renderer_get_drm_fd(drw)) >= 0)
     wlr_linux_drm_syncobj_manager_v1_create(dpy, 1, drm_fd);
 
   /* Autocreates an allocator for us.
@@ -2575,15 +2579,18 @@ void setup(void) {
   wlr_viewporter_create(dpy);
   wlr_single_pixel_buffer_manager_v1_create(dpy);
   wlr_fractional_scale_manager_v1_create(dpy, 1);
-  wlr_presentation_create(dpy, backend, 2);
+  // wlr_presentation_create(dpy, backend, 2);
+  wlr_presentation_create(dpy, backend);
   wlr_alpha_modifier_v1_create(dpy);
 
   /* Initializes the interface used to implement urgency hints */
   activation = wlr_xdg_activation_v1_create(dpy);
   wl_signal_add(&activation->events.request_activate, &request_activate);
 
-  wlr_scene_set_gamma_control_manager_v1(
-      scene, wlr_gamma_control_manager_v1_create(dpy));
+  // wlr_scene_set_gamma_control_manager_v1(
+  //     scene, wlr_gamma_control_manager_v1_create(dpy));
+  wlr_gamma_control_manager_v1_create(
+      dpy); // Call directly, remove scene setter
 
   power_mgr = wlr_output_power_manager_v1_create(dpy);
   wl_signal_add(&power_mgr->events.set_mode, &output_power_mgr_set_mode);
@@ -2634,14 +2641,11 @@ void setup(void) {
   xdg_decoration_mgr = wlr_xdg_decoration_manager_v1_create(dpy);
   wl_signal_add(&xdg_decoration_mgr->events.new_toplevel_decoration,
                 &new_xdg_decoration);
-
   pointer_constraints = wlr_pointer_constraints_v1_create(dpy);
   wl_signal_add(&pointer_constraints->events.new_constraint,
                 &new_pointer_constraint);
 
   relative_pointer_mgr = wlr_relative_pointer_manager_v1_create(dpy);
-
-  output_configure_scene(&m->scene_output->scene->tree.node, NULL);
 
   /*
    * Creates a cursor, which is a wlroots utility for tracking the cursor
@@ -2941,6 +2945,8 @@ void updatemons(struct wl_listener *listener, void *data) {
     if (blur) {
       wlr_scene_optimized_blur_set_size(m->blur_layer, m->m.width, m->m.height);
     }
+
+    output_configure_scene(&m->scene_output->scene->tree.node, NULL);
 
     if (m->lock_surface) {
       struct wlr_scene_tree *scene_tree = m->lock_surface->surface->data;
