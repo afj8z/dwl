@@ -2124,7 +2124,11 @@ void mapnotify(struct wl_listener *listener, void *data) {
   c->geom.height += 2 * c->bw;
 
   /* Insert this client into client lists. */
-  wl_list_insert(&clients, &c->link);
+  if (clients.prev)
+    // tile at the bottom
+    wl_list_insert(clients.prev, &c->link);
+  else
+    wl_list_insert(&clients, &c->link);
   wl_list_insert(&fstack, &c->flink);
 
   /* Set initial monitor, tags, floating status, and focus:
@@ -3099,13 +3103,11 @@ void tile(Monitor *m) {
   }
 }
 
-void
-togglebar(const Arg *arg) {
-	DwlIpcOutput *ipc_output;
-	wl_list_for_each(ipc_output, &selmon->dwl_ipc_outputs, link)
-		zdwl_ipc_output_v2_send_toggle_visibility(ipc_output->resource);
+void togglebar(const Arg *arg) {
+  DwlIpcOutput *ipc_output;
+  wl_list_for_each(ipc_output, &selmon->dwl_ipc_outputs, link)
+      zdwl_ipc_output_v2_send_toggle_visibility(ipc_output->resource);
 }
-
 
 void togglefloating(const Arg *arg) {
   Client *sel = focustop(selmon);

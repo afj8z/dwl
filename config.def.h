@@ -20,9 +20,9 @@ static const float fullscreen_bg[] = {0.1f, 0.1f, 0.1f,
 /* VANITYGAPS PATCH */
 static const int smartgaps =
     0; /* 1 means no outer gap when there is only one window */
-static const int monoclegaps = 0; /* 1 means outer gaps in monocle layout */
-static const unsigned int gappih = 10; /* horiz inner gap between windows */
-static const unsigned int gappiv = 10; /* vert inner gap between windows */
+static const int monoclegaps = 0;     /* 1 means outer gaps in monocle layout */
+static const unsigned int gappih = 5; /* horiz inner gap between windows */
+static const unsigned int gappiv = 5; /* vert inner gap between windows */
 static const unsigned int gappoh =
     10; /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov =
@@ -31,9 +31,9 @@ static const unsigned int gappov =
 
 /* SCENEFX PATCH */
 static const int opacity = 0; /* flag to enable opacity */
-static const float opacity_inactive = 0.5;
+static const float opacity_inactive = 0.85;
 static const float opacity_active = 1.0;
-static const int shadow = 1; /* flag to enable shadow */
+static const int shadow = 0; /* flag to enable shadow */
 static const int shadow_only_floating =
     0; /* only apply shadow to floating windows */
 static const float shadow_color[4] = COLOR(0x0000FFff);
@@ -52,12 +52,12 @@ static const int blur_xray = 0; /* flag to make transparent fs and floating
                                    windows display your background */
 static const int blur_ignore_transparent = 1;
 static const struct blur_data blur_data = {
-    .radius = 5,
+    .radius = 4,
     .num_passes = 3,
     .noise = (float)0.02,
     .brightness = (float)0.9,
     .contrast = (float)0.9,
-    .saturation = (float)1.1,
+    .saturation = (float)1.2,
 };
 /* SCENEFX PATH END */
 
@@ -93,7 +93,7 @@ static const MonitorRule monrules[] = {
      * example of a HiDPI laptop monitor:
      { "eDP-1",    0.5f,  1,      2,    &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,
      -1,  -1 }, */
-    {NULL, 0.55f, 1, 1, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
+    {NULL, 0.5f, 1, 1, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1},
     /* default monitor rule: can be changed but cannot be eliminated; at least
        one monitor rule must exist */
 };
@@ -104,11 +104,10 @@ static const struct xkb_rule_names xkb_rules = {
     /* example:
     .options = "ctrl:nocaps",
     */
-    .options = NULL,
-};
+    .options = "compose:menu"};
 
-static const int repeat_rate = 25;
-static const int repeat_delay = 600;
+static const int repeat_rate = 30;
+static const int repeat_delay = 225;
 
 /* Trackpad */
 static const int tap_to_click = 1;
@@ -205,24 +204,25 @@ static const Key keys[] = {
     {MODKEY, XKB_KEY_Tab, view, {0}},
     {MODKEY, XKB_KEY_q, killclient, {0}},
     {MODKEY, XKB_KEY_t, setlayout, {.v = &layouts[0]}},
-    {MODKEY, XKB_KEY_f, setlayout, {.v = &layouts[1]}},
+    {MODKEY, XKB_KEY_e, setlayout, {.v = &layouts[1]}},
     {MODKEY, XKB_KEY_m, setlayout, {.v = &layouts[2]}},
     {MODKEY, XKB_KEY_space, setlayout, {0}},
     {MODKEY, XKB_KEY_b, togglebar, {0}},
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_space, togglefloating, {0}},
-    {MODKEY, XKB_KEY_e, togglefullscreen, {0}},
-    // {MODKEY, XKB_KEY_0, view, {.ui = ~0}},
+    {MODKEY, XKB_KEY_f, togglefullscreen, {0}},
+    {MODKEY, XKB_KEY_0, view, {.ui = ~0}},
 
     /* VANITYGAPS PATCH KEYS */
-    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, incgaps, {.i = +1}},
-    {MODKEY | WLR_MODIFIER_LOGO, XKB_KEY_g, incgaps, {.i = -1}},
+
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_greater, incgaps, {.i = +1}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_less, incgaps, {.i = -1}},
     // { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_H, incogaps, {.i
     // = +1 } }, { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_L,
     // incogaps,      {.i = -1 } }, {
     // MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_h,      incigaps,
     // {.i = +1 } }, { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_l,
     // incigaps,      {.i = -1 } },
-    {MODKEY, XKB_KEY_0, togglegaps, {0}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, togglegaps, {0}},
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, defaultgaps, {0}},
     // { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1
     // } }, { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i
@@ -245,14 +245,14 @@ static const Key keys[] = {
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, tag, {.ui = ~0}},
     {MODKEY, XKB_KEY_comma, focusmon, {.i = WLR_DIRECTION_LEFT}},
     {MODKEY, XKB_KEY_period, focusmon, {.i = WLR_DIRECTION_RIGHT}},
-    {MODKEY | WLR_MODIFIER_SHIFT,
-     XKB_KEY_less,
-     tagmon,
-     {.i = WLR_DIRECTION_LEFT}},
-    {MODKEY | WLR_MODIFIER_SHIFT,
-     XKB_KEY_greater,
-     tagmon,
-     {.i = WLR_DIRECTION_RIGHT}},
+    // {MODKEY | WLR_MODIFIER_SHIFT,
+    //  XKB_KEY_less,
+    //  tagmon,
+    //  {.i = WLR_DIRECTION_LEFT}},
+    // {MODKEY | WLR_MODIFIER_SHIFT,
+    //  XKB_KEY_greater,
+    //  tagmon,
+    //  {.i = WLR_DIRECTION_RIGHT}},
     TAGKEYS(XKB_KEY_1, XKB_KEY_exclam, 0),
     TAGKEYS(XKB_KEY_2, XKB_KEY_at, 1),
     TAGKEYS(XKB_KEY_3, XKB_KEY_numbersign, 2),
