@@ -5,11 +5,15 @@
 #include <libinput.h>
 #include <linux/input-event-codes.h>
 #include <math.h>
+// #include <scenefx-0.2/scenefx/render/fx_renderer/fx_renderer.h>
+// #include <scenefx-0.2/scenefx/types/wlr_scene.h>
+// #include <scenefx-0.2/scenefx/types/fx/blur_data.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <time.h>
+
 #include <unistd.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>

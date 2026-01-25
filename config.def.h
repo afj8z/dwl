@@ -169,7 +169,7 @@ static const char *voldown[] = {
 static const char *mute[] = {"wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@",
                              "toggle", NULL};
 static const char *lightup[] = {"notify-med", "bright_up", NULL};
-static const char *lightdown[] = {"notify-med", "bright_down",  NULL};
+static const char *lightdown[] = {"notify-med", "bright_down", NULL};
 
 static const Key keys[] = {
     /* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
