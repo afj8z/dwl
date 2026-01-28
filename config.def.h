@@ -7,7 +7,7 @@ static const int sloppyfocus = 1; /* focus follows mouse */
 static const int bypass_surface_visibility =
     0; /* 1 means idle inhibitors will disable idle tracking even if it's
           surface isn't visible  */
-static unsigned int borderpx = 1; /* border pixel of windows */
+static unsigned int borderpx = 0; /* border pixel of windows */
 static const float rootcolor[] = COLOR(0x222222ff);
 static float bordercolor[] = COLOR(0x444444ff);
 static float focuscolor[] = COLOR(0x005577ff);
@@ -24,40 +24,40 @@ static const int monoclegaps = 0;     /* 1 means outer gaps in monocle layout */
 static const unsigned int gappih = 5; /* horiz inner gap between windows */
 static const unsigned int gappiv = 5; /* vert inner gap between windows */
 static const unsigned int gappoh =
-    10; /* horiz outer gap between windows and screen edge */
+    25; /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov =
-    10; /* vert outer gap between windows and screen edge */
+    25; /* vert outer gap between windows and screen edge */
 /* VANITYGAPS PATCH END */
 
 /* SCENEFX PATCH */
 static const int opacity = 0; /* flag to enable opacity */
 static const float opacity_inactive = 0.85;
 static const float opacity_active = 1.0;
-static const int shadow = 0; /* flag to enable shadow */
+static int shadow = 1; /* flag to enable shadow */
 static const int shadow_only_floating =
     0; /* only apply shadow to floating windows */
-static const float shadow_color[4] = COLOR(0x0000FFff);
-static const float shadow_color_focus[4] = COLOR(0xFF0000ff);
+static const float shadow_color[4] = COLOR(0x000000ff);
+static const float shadow_color_focus[4] = COLOR(0x222222ff);
 static const int shadow_blur_sigma = 20;
 static const int shadow_blur_sigma_focus = 40;
 static const char *const shadow_ignore_list[] = {
-    NULL};                                /* list of app-id to ignore */
-static const int corner_radius = 8;       /* 0 disables corner_radius */
-static const int corner_radius_inner = 9; /* 0 disables corner_radius */
+    NULL};                          /* list of app-id to ignore */
+static int corner_radius = 0;       /* 0 disables corner_radius */
+static int corner_radius_inner = 0; /* 0 disables corner_radius */
 static const int corner_radius_only_floating =
     0; /* only apply corner_radius and corner_radius_inner to floating windows
         */
 static const int blur = 1;      /* flag to enable blur */
-static const int blur_xray = 0; /* flag to make transparent fs and floating
+static const int blur_xray = 1; /* flag to make transparent fs and floating
                                    windows display your background */
-static const int blur_ignore_transparent = 1;
+static const int blur_ignore_transparent = 0;
 static const struct blur_data blur_data = {
     .radius = 4,
     .num_passes = 3,
     .noise = (float)0.02,
     .brightness = (float)0.9,
     .contrast = (float)0.9,
-    .saturation = (float)1.2,
+    .saturation = (float)1.4,
 };
 /* SCENEFX PATH END */
 
@@ -108,14 +108,14 @@ static const struct xkb_rule_names xkb_rules = {
     */
     .options = "compose:menu"};
 
-static const int repeat_rate = 30;
+static const int repeat_rate = 25;
 static const int repeat_delay = 225;
 
 /* Trackpad */
 static const int tap_to_click = 1;
 static const int tap_and_drag = 1;
 static const int drag_lock = 1;
-static const int natural_scrolling = 0;
+static const int natural_scrolling = 1;
 static const int disable_while_typing = 1;
 static const int left_handed = 0;
 static const int middle_button_emulation = 0;
@@ -199,6 +199,8 @@ static Key keys[] = {
     /* Note that Shift changes certain key codes: 2 -> at, etc. */
     /* modifier                  key                  function          argument
      */
+    {MODKEY, XKB_KEY_g, spawn, SHCMD("dmenu-webapps")},
+    {MODKEY, XKB_KEY_a, spawn, SHCMD("rofi-system-menu")},
     {MODKEY, XKB_KEY_d, spawn, {.v = menucmd}},
     {MODKEY, XKB_KEY_Return, spawn, {.v = termcmd}},
     {MODKEY, XKB_KEY_j, focusstack, {.i = +1}},
@@ -221,23 +223,22 @@ static Key keys[] = {
 
     /* VANITYGAPS PATCH KEYS */
 
-    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_greater, incgaps, {.i = +1}},
-    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_less, incgaps, {.i = -1}},
-    // { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_H, incogaps, {.i
-    // = +1 } }, { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_L,
-    // incogaps,      {.i = -1 } }, {
-    // MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_h,      incigaps,
-    // {.i = +1 } }, { MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_l,
-    // incigaps,      {.i = -1 } },
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_greater, incgaps, {.i = +8}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_less, incgaps, {.i = -8}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_L, incogaps, {.i = +8}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_H, incogaps, {.i = -8}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_J, incigaps, {.i = +8}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_K, incigaps, {.i = -8}},
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, togglegaps, {0}},
     {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, defaultgaps, {0}},
     // { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1
     // } }, { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i
     // = -1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incivgaps, {.i
     // = +1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o,          incivgaps, {.i
-    // = -1 } }, { MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_y,          incohgaps, {.i
-    // = +1 } }, { MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_o,          incohgaps, {.i
-    // = -1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps, {.i
+    // = -1 } },
+    // {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_minus, incohgaps, {.i = +8}},
+    // {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_equal, incohgaps, {.i = -8}},
+    // { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps, {.i
     // = +1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incovgaps, {.i
     // = -1 } },
 
@@ -249,13 +250,14 @@ static Key keys[] = {
     {0, XKB_KEY_XF86AudioRaiseVolume, spawn, {.v = volup}},
     {0, XKB_KEY_XF86MonBrightnessUp, spawn, {.v = lightup}},
     {0, XKB_KEY_XF86MonBrightnessDown, spawn, {.v = lightdown}},
-    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, tag, {.ui = ~0}},
+    {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_S, tag, {.ui = ~0}},
     {MODKEY, XKB_KEY_comma, focusmon, {.i = WLR_DIRECTION_LEFT}},
     {MODKEY, XKB_KEY_period, focusmon, {.i = WLR_DIRECTION_RIGHT}},
     // {MODKEY | WLR_MODIFIER_SHIFT,
     //  XKB_KEY_less,
     //  tagmon,
     //  {.i = WLR_DIRECTION_LEFT}},
+
     // {MODKEY | WLR_MODIFIER_SHIFT,
     //  XKB_KEY_greater,
     //  tagmon,

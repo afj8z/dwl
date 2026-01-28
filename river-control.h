@@ -3,6 +3,8 @@
 #ifdef KEYS_USED
 void default_binds(struct wl_list *);
 #endif
+void setcornerradius(const Arg *);
+void toggleshadow(const Arg *);
 void enter_mode(const Arg *);
 void create_mode_user(const Arg *);
 void oneshot_mode(const Arg *);
@@ -72,6 +74,8 @@ struct Func_str_type_pair Func_str_type_pair_list[] = {
     STR(setfocuscolor, FUNC_STR_ARG_TYPE_COLOR),
     STR(setbordercolor, FUNC_STR_ARG_TYPE_COLOR),
     STR(seturgentcolor, FUNC_STR_ARG_TYPE_COLOR),
+    STR(setcornerradius, FUNC_STR_ARG_TYPE_UINT),
+    STR(toggleshadow, FUNC_STR_ARG_TYPE_NONE),
     STR(setborderpx, FUNC_STR_ARG_TYPE_UINT),
     STR(setlayout, FUNC_STR_ARG_TYPE_LAYOUT),
     STR(spawn, FUNC_STR_ARG_TYPE_STRING_ARRAY),
@@ -186,6 +190,50 @@ void seturgentcolor(const Arg *arg) {
   int i;
   for (i = 0; i < 4; i++) {
     urgentcolor[i] = color[i];
+  }
+}
+
+void setcornerradius(const Arg *arg) {
+  Client *c;
+  Monitor *m;
+  corner_radius = arg->ui;
+  corner_radius_inner = arg->ui; /* Sync inner radius with outer */
+
+  wl_list_for_each(c, &clients, link) {
+    c->corner_radius = corner_radius;
+
+    // Manually update scene node to ensure changes apply even if radius is 0
+    if (c->round_border) {
+      int radius = c->corner_radius + c->bw;
+      if ((corner_radius_only_floating && !c->isfloating) || c->isfullscreen) {
+        radius = 0;
+      }
+      wlr_scene_rect_set_corner_radius(c->round_border, radius,
+                                       CORNER_LOCATION_ALL);
+    }
+  }
+  wl_list_for_each(c, &clients, link) {
+    c->corner_radius = corner_radius;
+    /* This function handles both the border rect AND the inner buffer clipping
+     */
+    update_client_corner_radius(c);
+  }
+  wl_list_for_each(m, &mons, link) { arrange(m); }
+}
+
+void toggleshadow(const Arg *arg) {
+  Client *c;
+  shadow = !shadow;
+
+  wl_list_for_each(c, &clients, link) {
+    // If disabling shadow manually force transparency because
+    // update_client_shadow_color returns early if !shadow
+    if (!shadow && c->shadow) {
+      wlr_scene_shadow_set_color(c->shadow, transparent);
+      c->has_shadow_enabled = 0;
+    } else {
+      update_client_shadow_color(c);
+    }
   }
 }
 

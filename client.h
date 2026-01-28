@@ -354,7 +354,7 @@ static inline void client_set_tiled(Client *c, uint32_t edges) {
 #ifdef XWAYLAND
   if (client_is_x11(c)) {
     wlr_xwayland_surface_set_maximized(
-        c->surface.xwayland, edges != WLR_EDGE_NONE, edges != WLR_EDGE_NONE);
+        c->surface.xwayland, edges != WLR_EDGE_NONE);
     return;
   }
 #endif

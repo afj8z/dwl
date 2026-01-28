@@ -930,6 +930,17 @@ void closemon(Monitor *m) {
   printstatus();
 }
 
+// BLUR FOR LAYER SHELL
+static void iter_layer_scene_buffers_blur(struct wlr_scene_buffer *buffer,
+                                          int sx, int sy, void *user_data) {
+  if (!blur)
+    return;
+  wlr_scene_buffer_set_backdrop_blur(buffer, 1);
+  wlr_scene_buffer_set_backdrop_blur_optimized(buffer, 1);
+  wlr_scene_buffer_set_backdrop_blur_ignore_transparent(
+      buffer, blur_ignore_transparent);
+}
+
 void commitlayersurfacenotify(struct wl_listener *listener, void *data) {
   LayerSurface *l = wl_container_of(listener, l, surface_commit);
   struct wlr_layer_surface_v1 *layer_surface = l->layer_surface;
@@ -953,6 +964,8 @@ void commitlayersurfacenotify(struct wl_listener *listener, void *data) {
       l->mapped == layer_surface->surface->mapped)
     return;
   l->mapped = layer_surface->surface->mapped;
+  wlr_scene_node_for_each_buffer(&l->scene->node, iter_layer_scene_buffers_blur,
+                                 NULL); // BLUR FOR LAYER SHELL
 
   if (scene_layer != l->scene->node.parent) {
     wlr_scene_node_reparent(&l->scene->node, scene_layer);
