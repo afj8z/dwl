@@ -209,18 +209,20 @@ static inline int client_is_float_type(Client *c) {
   if (client_is_x11(c)) {
     struct wlr_xwayland_surface *surface = c->surface.xwayland;
     xcb_size_hints_t *size_hints = surface->size_hints;
+    size_t i;
+    xcb_atom_t *type;
+
     if (surface->modal)
       return 1;
 
-    if (wlr_xwayland_surface_has_window_type(
-            surface, WLR_XWAYLAND_NET_WM_WINDOW_TYPE_DIALOG) ||
-        wlr_xwayland_surface_has_window_type(
-            surface, WLR_XWAYLAND_NET_WM_WINDOW_TYPE_SPLASH) ||
-        wlr_xwayland_surface_has_window_type(
-            surface, WLR_XWAYLAND_NET_WM_WINDOW_TYPE_TOOLBAR) ||
-        wlr_xwayland_surface_has_window_type(
-            surface, WLR_XWAYLAND_NET_WM_WINDOW_TYPE_UTILITY)) {
-      return 1;
+    for (i = 0; i < surface->window_type_len; i++) {
+      type = &surface->window_type[i];
+      /* Try xwayland->xwm->atoms if xwayland->atoms fails (0.19 headers) */
+      if (*type == xwayland->xwm->atoms.net_wm_window_type_dialog ||
+          *type == xwayland->xwm->atoms.net_wm_window_type_splash ||
+          *type == xwayland->xwm->atoms.net_wm_window_type_toolbar ||
+          *type == xwayland->xwm->atoms.net_wm_window_type_utility)
+        return 1;
     }
 
     return size_hints && size_hints->min_width > 0 &&
@@ -353,8 +355,8 @@ static inline uint32_t client_set_size(Client *c, uint32_t width,
 static inline void client_set_tiled(Client *c, uint32_t edges) {
 #ifdef XWAYLAND
   if (client_is_x11(c)) {
-    wlr_xwayland_surface_set_maximized(
-        c->surface.xwayland, edges != WLR_EDGE_NONE);
+    wlr_xwayland_surface_set_maximized(c->surface.xwayland,
+                                       edges != WLR_EDGE_NONE);
     return;
   }
 #endif
@@ -379,9 +381,7 @@ static inline void client_set_suspended(Client *c, int suspended) {
 static inline int client_wants_focus(Client *c) {
 #ifdef XWAYLAND
   return client_is_unmanaged(c) &&
-         wlr_xwayland_surface_override_redirect_wants_focus(
-             c->surface.xwayland) &&
-         wlr_xwayland_surface_icccm_input_model(c->surface.xwayland) !=
+         wlr_xwayland_icccm_input_model(c->surface.xwayland) !=
              WLR_ICCCM_INPUT_MODEL_NONE;
 #endif
   return 0;
