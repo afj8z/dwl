@@ -1,7 +1,7 @@
 /* Taken from https://github.com/djpohly/dwl/issues/466 */
 #define COLOR(hex)                                                            \
-  { ((hex >> 24) & 0xFF) / 255.0f, ((hex >> 16) & 0xFF) / 255.0f,             \
-    ((hex >> 8) & 0xFF) / 255.0f, (hex & 0xFF) / 255.0f }
+    { ((hex >> 24) & 0xFF) / 255.0f, ((hex >> 16) & 0xFF) / 255.0f,           \
+      ((hex >> 8) & 0xFF) / 255.0f, (hex & 0xFF) / 255.0f }
 /* appearance */
 static const int sloppyfocus = 1; /* focus follows mouse */
 static const int bypass_surface_visibility
@@ -17,6 +17,9 @@ static float urgentcolor[] = COLOR (0xff0000ff);
 static const float fullscreen_bg[]
     = { 0.1f, 0.1f, 0.1f, 0.0f }; /* You can also use glsl colors */
 
+static const int respect_monitor_reserved_area
+    = 0; /* 1 to monitor center while respecting the monitor's reserved area, 0
+            to monitor center */
 /* VANITYGAPS PATCH */
 static const int smartgaps
     = 0; /* 1 means no outer gap when there is only one window */
@@ -30,10 +33,10 @@ static const unsigned int gappov
 /* VANITYGAPS PATCH END */
 
 /* SCENEFX PATCH */
-static const int opacity = 0; /* flag to enable opacity */
+static const int opacity = 1; /* flag to enable opacity */
 static const float opacity_inactive = 0.85;
 static const float opacity_active = 1.0;
-static int shadow = 1; /* flag to enable shadow */
+static int shadow = 0; /* flag to enable shadow */
 static const int shadow_only_floating
     = 0; /* only apply shadow to floating windows */
 static const float shadow_color[4] = COLOR (0x000000ff);
@@ -48,17 +51,17 @@ static const int corner_radius_only_floating
     = 0; /* only apply corner_radius and corner_radius_inner to floating
           * windows
           */
-static const int blur = 1;      /* flag to enable blur */
-static const int blur_xray = 1; /* flag to make transparent fs and floating
+static const int blur = 0;      /* flag to enable blur */
+static const int blur_xray = 0; /* flag to make transparent fs and floating
                                    windows display your background */
-static const int blur_ignore_transparent = 0;
+static const int blur_ignore_transparent = 1;
 static const struct blur_data blur_data = {
-  .radius = 4,
-  .num_passes = 3,
-  .noise = (float)0.02,
-  .brightness = (float)0.9,
-  .contrast = (float)0.9,
-  .saturation = (float)1.4,
+    .radius = 4,
+    .num_passes = 3,
+    .noise = (float)0.02,
+    .brightness = (float)0.9,
+    .contrast = (float)0.9,
+    .saturation = (float)1.4,
 };
 /* SCENEFX PATCH END */
 
@@ -71,20 +74,20 @@ static int log_level = WLR_ERROR;
 #define USE_RULES
 #define NEW_RULES_OVERRIDE
 static Rule rules[] = {
-  /* app_id             title       tags mask     isfloating   monitor */
-  { "Gimp_EXAMPLE", NULL, 0, 1,
-    -1 }, /* Start on currently visible tags floating, not tiled */
-  { "firefox_EXAMPLE", NULL, 1 << 8, 0, -1 }, /* Start on ONLY tag "9" */
-  /* default/example rule: can be changed but cannot be eliminated; at least
-     one rule must exist */
+    /* app_id             title       tags mask     isfloating   monitor   x y
+       width   height */
+    { "foot_FLOAT_C", NULL, 0, 1, -1, 500, 250, 920,
+      580 }, /* Start on currently visible tags floating, not tiled */
+    { "CLIENT_FLOAT", NULL, 0, 1, -1, -2, -2, -1,
+      -1 }, /* window centered; sizing defered back to wayland client */
 };
 
 /* layout(s) */
 static const Layout layouts[] = {
-  /* symbol     arrange function */
-  { "[]=", tile },
-  { "><>", NULL }, /* no layout function means floating behavior */
-  { "[M]", monocle },
+    /* symbol     arrange function */
+    { "[]=", tile },
+    { "><>", NULL }, /* no layout function means floating behavior */
+    { "[M]", monocle },
 };
 
 /* monitors */
@@ -92,22 +95,22 @@ static const Layout layouts[] = {
  * WARNING: negative values other than (-1, -1) cause problems with Xwayland
  * clients due to https://gitlab.freedesktop.org/xorg/xserver/-/issues/899 */
 static const MonitorRule monrules[] = {
-  /* name        mfact  nmaster scale layout       rotate/reflect x    y
-   * example of a HiDPI laptop monitor:
-   { "eDP-1",    0.5f,  1,      2,    &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,
-   -1,  -1 }, */
-  { NULL, 0.5f, 1, 1, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1 },
-  /* default monitor rule: can be changed but cannot be eliminated; at least
-     one monitor rule must exist */
+    /* name        mfact  nmaster scale layout       rotate/reflect x    y
+     * example of a HiDPI laptop monitor:
+     { "eDP-1",    0.5f,  1,      2,    &layouts[0],
+     WL_OUTPUT_TRANSFORM_NORMAL, -1,  -1 }, */
+    { NULL, 0.5f, 1, 1, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1 },
+    /* default monitor rule: can be changed but cannot be eliminated; at least
+       one monitor rule must exist */
 };
 
 /* keyboard */
 static const struct xkb_rule_names xkb_rules = {
-  /* can specify fields: rules, model, layout, variant, options */
-  /* example:
-  .options = "ctrl:nocaps",
-  */
-  .options = "compose:menu"
+    /* can specify fields: rules, model, layout, variant, options */
+    /* example:
+    .options = "ctrl:nocaps",
+    */
+    .options = "compose:menu"
 };
 
 static const int repeat_rate = 25;
@@ -164,21 +167,21 @@ static const enum libinput_config_tap_button_map button_map
 #define MODKEY WLR_MODIFIER_LOGO
 
 #define TAGKEYS(KEY, SKEY, TAG)                                               \
-  { MODKEY, KEY, view, { .ui = 1 << TAG } },                                  \
-      { MODKEY | WLR_MODIFIER_CTRL, KEY, toggleview, { .ui = 1 << TAG } },    \
-      { MODKEY | WLR_MODIFIER_SHIFT, SKEY, tag, { .ui = 1 << TAG } },         \
-  {                                                                           \
-    MODKEY | WLR_MODIFIER_CTRL | WLR_MODIFIER_SHIFT, SKEY, toggletag,         \
+    { MODKEY, KEY, view, { .ui = 1 << TAG } },                                \
+        { MODKEY | WLR_MODIFIER_CTRL, KEY, toggleview, { .ui = 1 << TAG } },  \
+        { MODKEY | WLR_MODIFIER_SHIFT, SKEY, tag, { .ui = 1 << TAG } },       \
     {                                                                         \
-      .ui = 1 << TAG                                                          \
-    }                                                                         \
-  }
+        MODKEY | WLR_MODIFIER_CTRL | WLR_MODIFIER_SHIFT, SKEY, toggletag,     \
+        {                                                                     \
+            .ui = 1 << TAG                                                    \
+        }                                                                     \
+    }
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd)                                                            \
-  {                                                                           \
-    .v = (const char *[]) { "/bin/sh", "-c", cmd, NULL }                      \
-  }
+    {                                                                         \
+        .v = (const char *[]) { "/bin/sh", "-c", cmd, NULL }                  \
+    }
 
 /* commands */
 static const char *termcmd[] = { "foot", NULL };
@@ -202,115 +205,115 @@ static const char *lightdown[] = { "notify-med", "bright_down", NULL };
  * commented out the KEYS_USED macro bellow to disable the functionality*/
 #define KEYS_USED
 static Key keys[] = {
-  /* Note that Shift changes certain key codes: 2 -> at, etc. */
-  /* modifier                  key                  function          argument
-   */
-  { MODKEY, XKB_KEY_g, spawn, SHCMD ("dmenu-webapps") },
-  { MODKEY, XKB_KEY_a, spawn, SHCMD ("rofi-system-menu") },
-  { MODKEY, XKB_KEY_d, spawn, { .v = menucmd } },
-  { MODKEY, XKB_KEY_Return, spawn, { .v = termcmd } },
-  { MODKEY, XKB_KEY_j, focusstack, { .i = +1 } },
-  { MODKEY, XKB_KEY_k, focusstack, { .i = -1 } },
-  { MODKEY, XKB_KEY_i, incnmaster, { .i = +1 } },
-  { MODKEY, XKB_KEY_o, incnmaster, { .i = -1 } },
-  { MODKEY, XKB_KEY_h, setmfact, { .f = -0.05f } },
-  { MODKEY, XKB_KEY_l, setmfact, { .f = +0.05f } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_Return, zoom, { 0 } },
-  { MODKEY, XKB_KEY_Tab, view, { 0 } },
-  { MODKEY, XKB_KEY_q, killclient, { 0 } },
-  { MODKEY, XKB_KEY_t, setlayout, { .v = &layouts[0] } },
-  { MODKEY, XKB_KEY_e, setlayout, { .v = &layouts[1] } },
-  { MODKEY, XKB_KEY_m, setlayout, { .v = &layouts[2] } },
-  { MODKEY, XKB_KEY_space, setlayout, { 0 } },
-  { MODKEY, XKB_KEY_b, togglebar, { 0 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_space, togglefloating, { 0 } },
-  { MODKEY, XKB_KEY_f, togglefullscreen, { 0 } },
-  { MODKEY, XKB_KEY_0, view, { .ui = ~0 } },
+    /* Note that Shift changes certain key codes: 2 -> at, etc. */
+    /* modifier                  key                  function argument
+     */
+    // { MODKEY, XKB_KEY_g, spawn, SHCMD ("dmenu-webapps") },
+    // { MODKEY, XKB_KEY_a, spawn, SHCMD ("rofi-system-menu") },
+    // { MODKEY, XKB_KEY_d, spawn, { .v = menucmd } },
+    { MODKEY, XKB_KEY_Return, spawn, { .v = termcmd } },
+    { MODKEY, XKB_KEY_j, focusstack, { .i = +1 } },
+    { MODKEY, XKB_KEY_k, focusstack, { .i = -1 } },
+    { MODKEY, XKB_KEY_i, incnmaster, { .i = +1 } },
+    { MODKEY, XKB_KEY_o, incnmaster, { .i = -1 } },
+    { MODKEY, XKB_KEY_h, setmfact, { .f = -0.05f } },
+    { MODKEY, XKB_KEY_l, setmfact, { .f = +0.05f } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_Return, zoom, { 0 } },
+    { MODKEY, XKB_KEY_Tab, view, { 0 } },
+    { MODKEY, XKB_KEY_q, killclient, { 0 } },
+    { MODKEY, XKB_KEY_t, setlayout, { .v = &layouts[0] } },
+    { MODKEY, XKB_KEY_e, setlayout, { .v = &layouts[1] } },
+    { MODKEY, XKB_KEY_m, setlayout, { .v = &layouts[2] } },
+    { MODKEY, XKB_KEY_space, setlayout, { 0 } },
+    { MODKEY, XKB_KEY_b, togglebar, { 0 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_space, togglefloating, { 0 } },
+    { MODKEY, XKB_KEY_f, togglefullscreen, { 0 } },
+    { MODKEY, XKB_KEY_0, view, { .ui = ~0 } },
 
-  /* VANITYGAPS PATCH KEYS */
+    /* VANITYGAPS PATCH KEYS */
 
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_greater, incgaps, { .i = +8 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_less, incgaps, { .i = -8 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_L, incogaps, { .i = +8 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_H, incogaps, { .i = -8 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_J, incigaps, { .i = +8 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_K, incigaps, { .i = -8 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, togglegaps, { 0 } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, defaultgaps, { 0 } },
-  // { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1
-  // } }, { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i
-  // = -1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incivgaps, {.i
-  // = +1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o,          incivgaps, {.i
-  // = -1 } },
-  // {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_minus, incohgaps, {.i = +8}},
-  // {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_equal, incohgaps, {.i = -8}},
-  // { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps, {.i
-  // = +1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incovgaps, {.i
-  // = -1 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_greater, incgaps, { .i = +8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_less, incgaps, { .i = -8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_L, incogaps, { .i = +8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_H, incogaps, { .i = -8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_J, incigaps, { .i = +8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_K, incigaps, { .i = -8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, togglegaps, { 0 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, defaultgaps, { 0 } },
+    // { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1
+    // } }, { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i
+    // = -1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incivgaps,
+    // {.i = +1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o, incivgaps, {.i =
+    // -1 } }, {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_minus, incohgaps, {.i =
+    // +8}}, {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_equal, incohgaps, {.i =
+    // -8}}, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps, {.i =
+    // +1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incovgaps, {.i
+    // = -1 } },
 
-  /* VANITYGAPS PATCH KEYS END */
+    /* VANITYGAPS PATCH KEYS END */
 
-  // media control
-  { 0, XKB_KEY_XF86AudioMute, spawn, { .v = mute } },
-  { 0, XKB_KEY_XF86AudioLowerVolume, spawn, { .v = voldown } },
-  { 0, XKB_KEY_XF86AudioRaiseVolume, spawn, { .v = volup } },
-  { 0, XKB_KEY_XF86MonBrightnessUp, spawn, { .v = lightup } },
-  { 0, XKB_KEY_XF86MonBrightnessDown, spawn, { .v = lightdown } },
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_S, tag, { .ui = ~0 } },
-  { MODKEY, XKB_KEY_comma, focusmon, { .i = WLR_DIRECTION_LEFT } },
-  { MODKEY, XKB_KEY_period, focusmon, { .i = WLR_DIRECTION_RIGHT } },
-  // {MODKEY | WLR_MODIFIER_SHIFT,
-  //  XKB_KEY_less,
-  //  tagmon,
-  //  {.i = WLR_DIRECTION_LEFT}},
+    // media control
+    { 0, XKB_KEY_XF86AudioMute, spawn, { .v = mute } },
+    { 0, XKB_KEY_XF86AudioLowerVolume, spawn, { .v = voldown } },
+    { 0, XKB_KEY_XF86AudioRaiseVolume, spawn, { .v = volup } },
+    { 0, XKB_KEY_XF86MonBrightnessUp, spawn, { .v = lightup } },
+    { 0, XKB_KEY_XF86MonBrightnessDown, spawn, { .v = lightdown } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_S, tag, { .ui = ~0 } },
+    { MODKEY, XKB_KEY_comma, focusmon, { .i = WLR_DIRECTION_LEFT } },
+    { MODKEY, XKB_KEY_period, focusmon, { .i = WLR_DIRECTION_RIGHT } },
+    // {MODKEY | WLR_MODIFIER_SHIFT,
+    //  XKB_KEY_less,
+    //  tagmon,
+    //  {.i = WLR_DIRECTION_LEFT}},
 
-  // {MODKEY | WLR_MODIFIER_SHIFT,
-  //  XKB_KEY_greater,
-  //  tagmon,
-  //  {.i = WLR_DIRECTION_RIGHT}},
-  TAGKEYS (XKB_KEY_1, XKB_KEY_exclam, 0),
-  TAGKEYS (XKB_KEY_2, XKB_KEY_at, 1),
-  TAGKEYS (XKB_KEY_3, XKB_KEY_numbersign, 2),
-  TAGKEYS (XKB_KEY_4, XKB_KEY_dollar, 3),
-  TAGKEYS (XKB_KEY_5, XKB_KEY_percent, 4),
-  TAGKEYS (XKB_KEY_6, XKB_KEY_asciicircum, 5),
-  TAGKEYS (XKB_KEY_7, XKB_KEY_ampersand, 6),
-  TAGKEYS (XKB_KEY_8, XKB_KEY_asterisk, 7),
-  TAGKEYS (XKB_KEY_9, XKB_KEY_parenleft, 8),
+    // {MODKEY | WLR_MODIFIER_SHIFT,
+    //  XKB_KEY_greater,
+    //  tagmon,
+    //  {.i = WLR_DIRECTION_RIGHT}},
+    TAGKEYS (XKB_KEY_1, XKB_KEY_exclam, 0),
+    TAGKEYS (XKB_KEY_2, XKB_KEY_at, 1),
+    TAGKEYS (XKB_KEY_3, XKB_KEY_numbersign, 2),
+    TAGKEYS (XKB_KEY_4, XKB_KEY_dollar, 3),
+    TAGKEYS (XKB_KEY_5, XKB_KEY_percent, 4),
+    TAGKEYS (XKB_KEY_6, XKB_KEY_asciicircum, 5),
+    TAGKEYS (XKB_KEY_7, XKB_KEY_ampersand, 6),
+    TAGKEYS (XKB_KEY_8, XKB_KEY_asterisk, 7),
+    TAGKEYS (XKB_KEY_9, XKB_KEY_parenleft, 8),
 };
 static Key keys_always[] = {
-  { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_q, quit, { 0 } },
-  /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
-  { WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT,
-    XKB_KEY_Terminate_Server,
-    quit,
-    { 0 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_q, quit, { 0 } },
+    /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
+    { WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT,
+      XKB_KEY_Terminate_Server,
+      quit,
+      { 0 } },
 /* Ctrl-Alt-Fx is used to switch to another VT, if you don't know what a VT is
  * do not remove them.
  */
 #define CHVT(n)                                                               \
-  {                                                                           \
-    WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_##n, chvt,    \
     {                                                                         \
-      .ui = (n)                                                               \
-    }                                                                         \
-  }
-  CHVT (1),
-  CHVT (2),
-  CHVT (3),
-  CHVT (4),
-  CHVT (5),
-  CHVT (6),
-  CHVT (7),
-  CHVT (8),
-  CHVT (9),
-  CHVT (10),
-  CHVT (11),
-  CHVT (12),
+        WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_##n,      \
+            chvt,                                                             \
+        {                                                                     \
+            .ui = (n)                                                         \
+        }                                                                     \
+    }
+    CHVT (1),
+    CHVT (2),
+    CHVT (3),
+    CHVT (4),
+    CHVT (5),
+    CHVT (6),
+    CHVT (7),
+    CHVT (8),
+    CHVT (9),
+    CHVT (10),
+    CHVT (11),
+    CHVT (12),
 };
 
 static const Button buttons[] = {
-  { MODKEY, BTN_LEFT, moveresize, { .ui = CurMove } },
-  { MODKEY, BTN_MIDDLE, togglefloating, { 0 } },
-  { MODKEY, BTN_RIGHT, moveresize, { .ui = CurResize } },
+    { MODKEY, BTN_LEFT, moveresize, { .ui = CurMove } },
+    { MODKEY, BTN_MIDDLE, togglefloating, { 0 } },
+    { MODKEY, BTN_RIGHT, moveresize, { .ui = CurResize } },
 };
