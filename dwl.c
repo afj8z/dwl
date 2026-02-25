@@ -297,6 +297,10 @@ typedef struct
     uint32_t tags;
     int isfloating;
     int monitor;
+    int x;
+    int y;
+    float w;
+    float h;
 } Rule;
 
 typedef struct
@@ -634,9 +638,21 @@ applyrules (Client *c)
     const Rule *r;
     Monitor *mon = selmon, *m;
 
+<<<<<<< HEAD
     appid = client_get_appid (c);
     title = client_get_title (c);
 
+=======
+    int newwidth;
+    int newheight;
+    int newx;
+    int newy;
+    int apply_resize = 0;
+
+    appid = client_get_appid (c);
+    title = client_get_title (c);
+
+>>>>>>> patch/cstmfloat
     wl_list_for_each (rl, &rules_list, link)
     {
         r = rl->rule;
@@ -650,12 +666,66 @@ applyrules (Client *c)
                 {
                     if (r->monitor == i++)
                         mon = m;
+<<<<<<< HEAD
+=======
+
+                    if (c->isfloating || !mon->lt[mon->sellt]->arrange)
+                        {
+                            /* client is floating or in floating layout */
+                            struct wlr_box b = respect_monitor_reserved_area
+                                                   ? mon->w
+                                                   : mon->m;
+
+                            newwidth = (int)round (
+                                (r->w >= 0)
+                                    ? (r->w <= 1 ? b.width * r->w : r->w)
+                                    : c->geom.width);
+                            newheight = (int)round (
+                                (r->h >= 0)
+                                    ? (r->h <= 1 ? b.height * r->h : r->h)
+                                    : c->geom.height);
+
+                            /* CHANGED: -1 falls back to client geometry (0,0),
+                             * -2 perfectly centers the window */
+                            newx = (int)round (
+                                (r->x >= 0)
+                                    ? (r->x <= 1 ? b.width * r->x + b.x
+                                                 : r->x + b.x)
+                                    : (r->x == -2
+                                           ? b.x + (b.width - newwidth) / 2.0
+                                           : c->geom.x));
+                            newy = (int)round (
+                                (r->y >= 0)
+                                    ? (r->y <= 1 ? b.height * r->y + b.y
+                                                 : r->y + b.y)
+                                    : (r->y == -2
+                                           ? b.y + (b.height - newheight) / 2.0
+                                           : c->geom.y));
+
+                            apply_resize = 1;
+                        }
+>>>>>>> patch/cstmfloat
                 }
             }
     }
 
     c->isfloating |= client_is_float_type (c);
     setmon (c, mon, newtags);
+<<<<<<< HEAD
+=======
+
+    if (apply_resize)
+        {
+            resize (c,
+                    (struct wlr_box){
+                        .x = newx,
+                        .y = newy,
+                        .width = newwidth,
+                        .height = newheight,
+                    },
+                    1);
+        }
+>>>>>>> patch/cstmfloat
 }
 
 void
@@ -3227,8 +3297,13 @@ setmon (Client *c, Monitor *m, uint32_t newtags)
             /* Make sure window actually overlaps with the monitor */
             resize (c, c->geom, 0);
             c->tags = newtags ? newtags
+<<<<<<< HEAD
                               : m->tagset[m->seltags]; /* assign tags of target
                                                           monitor */
+=======
+                              : m->tagset[m->seltags]; /* assign tags of
+                                                          target monitor */
+>>>>>>> patch/cstmfloat
             setfullscreen (
                 c, c->isfullscreen); /* This will call arrange(c->mon) */
             setfloating (c, c->isfloating);
@@ -4199,11 +4274,14 @@ output_configure_scene (struct wlr_scene_node *node, Client *c)
             if (c && xdg_surface
                 && xdg_surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
                 {
+<<<<<<< HEAD
                     if (opacity)
                         {
                             wlr_scene_buffer_set_opacity (buffer, c->opacity);
                         }
 
+=======
+>>>>>>> patch/cstmfloat
                     if (!wlr_subsurface_try_from_wlr_surface (
                             xdg_surface->surface))
                         {
