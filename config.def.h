@@ -30,12 +30,15 @@ static const unsigned int gappoh
     = 25; /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov
     = 25; /* vert outer gap between windows and screen edge */
-/* VANITYGAPS PATCH END */
+          /* VANITYGAPS PATCH END */
 
-/* SCENEFX PATCH */
-static const int opacity = 1; /* flag to enable opacity */
-static const float opacity_inactive = 0.85;
-static const float opacity_active = 1.0;
+/* CLIENT OPACITY PATCH */
+static const float default_opacity_unfocus = 0.85f;
+static const float default_opacity_focus = 1.00f;
+
+/* SCENEFX PATCH
+ * ADD: removed opacity handling.
+ */
 static int shadow = 0; /* flag to enable shadow */
 static const int shadow_only_floating
     = 0; /* only apply shadow to floating windows */
@@ -74,11 +77,11 @@ static int log_level = WLR_ERROR;
 #define USE_RULES
 #define NEW_RULES_OVERRIDE
 static Rule rules[] = {
-    /* app_id             title       tags mask     isfloating   monitor   x y
-       width   height */
-    { "foot_FLOAT_C", NULL, 0, 1, -1, 500, 250, 920,
+    /* app_id  title  tags mask  isfloating  alpha  monitor  x y width height
+     */
+    { "foot_FLOAT_C", NULL, 0, 1, 1, -1, 500, 250, 920,
       580 }, /* Start on currently visible tags floating, not tiled */
-    { "CLIENT_FLOAT", NULL, 0, 1, -1, -2, -2, -1,
+    { "CLIENT_FLOAT", NULL, 0, 1, 1, -1, -2, -2, -1,
       -1 }, /* window centered; sizing defered back to wayland client */
 };
 
@@ -114,7 +117,7 @@ static const struct xkb_rule_names xkb_rules = {
 };
 
 static const int repeat_rate = 25;
-static const int repeat_delay = 225;
+static const int repeat_delay = 200;
 
 /* Trackpad */
 static const int tap_to_click = 1;
@@ -251,6 +254,25 @@ static Key keys[] = {
     // = -1 } },
 
     /* VANITYGAPS PATCH KEYS END */
+
+    /* CLIENT OPACITY KEYS */
+    { MODKEY | WLR_MODIFIER_CTRL,
+      XKB_KEY_i,
+      setopacityunfocus,
+      { .f = +0.1f } },
+    { MODKEY | WLR_MODIFIER_CTRL,
+      XKB_KEY_o,
+      setopacityunfocus,
+      { .f = -0.1f } },
+    { MODKEY | WLR_MODIFIER_CTRL | WLR_MODIFIER_SHIFT,
+      XKB_KEY_I,
+      setopacityfocus,
+      { .f = +0.1f } },
+    { MODKEY | WLR_MODIFIER_CTRL | WLR_MODIFIER_SHIFT,
+      XKB_KEY_O,
+      setopacityfocus,
+      { .f = -0.1f } },
+    /* CLIENT OPACITY KEYS END */
 
     // media control
     { 0, XKB_KEY_XF86AudioMute, spawn, { .v = mute } },
