@@ -15,7 +15,9 @@ static float urgentcolor[] = COLOR (0xff0000ff);
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
 static const float fullscreen_bg[]
-    = { 0.1f, 0.1f, 0.1f, 0.0f }; /* You can also use glsl colors */
+    = { 0.1f, 0.1f, 0.1f, 1.0f }; /* You can also use glsl colors */
+static const float default_opacity_unfocus = 0.70f;
+static const float default_opacity_focus = 1.00f;
 
 static const int respect_monitor_reserved_area
     = 0; /* 1 to monitor center while respecting the monitor's reserved area, 0
@@ -31,43 +33,6 @@ static const unsigned int gappoh
 static const unsigned int gappov
     = 25; /* vert outer gap between windows and screen edge */
           /* VANITYGAPS PATCH END */
-
-/* CLIENT OPACITY PATCH */
-static const float default_opacity_unfocus = 0.90f;
-
-static const float default_opacity_focus = 1.00f;
-
-/* SCENEFX PATCH
- * ADD: removed opacity handling.
- */
-static int shadow = 0; /* flag to enable shadow */
-static const int shadow_only_floating
-    = 0; /* only apply shadow to floating windows */
-static const float shadow_color[4] = COLOR (0x000000ff);
-static const float shadow_color_focus[4] = COLOR (0x222222ff);
-static const int shadow_blur_sigma = 20;
-static const int shadow_blur_sigma_focus = 40;
-static const char *const shadow_ignore_list[]
-    = { NULL };                     /* list of app-id to ignore */
-static int corner_radius = 0;       /* 0 disables corner_radius */
-static int corner_radius_inner = 0; /* 0 disables corner_radius */
-static const int corner_radius_only_floating
-    = 0; /* only apply corner_radius and corner_radius_inner to floating
-          * windows
-          */
-static const int blur = 0;      /* flag to enable blur */
-static const int blur_xray = 0; /* flag to make transparent fs and floating
-                                   windows display your background */
-static const int blur_ignore_transparent = 1;
-static const struct blur_data blur_data = {
-    .radius = 4,
-    .num_passes = 3,
-    .noise = (float)0.02,
-    .brightness = (float)0.9,
-    .contrast = (float)0.9,
-    .saturation = (float)1.4,
-};
-/* SCENEFX PATCH END */
 
 /* tagging - TAGCOUNT must be no greater than 31 */
 #define TAGCOUNT (9)
