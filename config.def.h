@@ -15,7 +15,9 @@ static float urgentcolor[] = COLOR (0xff0000ff);
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old
  * behavior */
 static const float fullscreen_bg[]
-    = { 0.1f, 0.1f, 0.1f, 0.0f }; /* You can also use glsl colors */
+    = { 0.1f, 0.1f, 0.1f, 1.0f }; /* You can also use glsl colors */
+static const float default_opacity_unfocus = 0.70f;
+static const float default_opacity_focus = 1.00f;
 
 static const int respect_monitor_reserved_area
     = 0; /* 1 to monitor center while respecting the monitor's reserved area, 0
@@ -30,40 +32,7 @@ static const unsigned int gappoh
     = 25; /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov
     = 25; /* vert outer gap between windows and screen edge */
-/* VANITYGAPS PATCH END */
-
-/* SCENEFX PATCH */
-static const int opacity = 1; /* flag to enable opacity */
-static const float opacity_inactive = 0.85;
-static const float opacity_active = 1.0;
-static int shadow = 0; /* flag to enable shadow */
-static const int shadow_only_floating
-    = 0; /* only apply shadow to floating windows */
-static const float shadow_color[4] = COLOR (0x000000ff);
-static const float shadow_color_focus[4] = COLOR (0x222222ff);
-static const int shadow_blur_sigma = 20;
-static const int shadow_blur_sigma_focus = 40;
-static const char *const shadow_ignore_list[]
-    = { NULL };                     /* list of app-id to ignore */
-static int corner_radius = 0;       /* 0 disables corner_radius */
-static int corner_radius_inner = 0; /* 0 disables corner_radius */
-static const int corner_radius_only_floating
-    = 0; /* only apply corner_radius and corner_radius_inner to floating
-          * windows
-          */
-static const int blur = 0;      /* flag to enable blur */
-static const int blur_xray = 0; /* flag to make transparent fs and floating
-                                   windows display your background */
-static const int blur_ignore_transparent = 1;
-static const struct blur_data blur_data = {
-    .radius = 4,
-    .num_passes = 3,
-    .noise = (float)0.02,
-    .brightness = (float)0.9,
-    .contrast = (float)0.9,
-    .saturation = (float)1.4,
-};
-/* SCENEFX PATCH END */
+          /* VANITYGAPS PATCH END */
 
 /* tagging - TAGCOUNT must be no greater than 31 */
 #define TAGCOUNT (9)
@@ -74,11 +43,11 @@ static int log_level = WLR_ERROR;
 #define USE_RULES
 #define NEW_RULES_OVERRIDE
 static Rule rules[] = {
-    /* app_id             title       tags mask     isfloating   monitor   x y
-       width   height */
-    { "foot_FLOAT_C", NULL, 0, 1, -1, 500, 250, 920,
+    /* app_id  title  tags mask  isfloating  alpha  monitor  x y width height
+     */
+    { "foot_FLOAT_C", NULL, 0, 1, 1, -1, 500, 250, 920,
       580 }, /* Start on currently visible tags floating, not tiled */
-    { "CLIENT_FLOAT", NULL, 0, 1, -1, -2, -2, -1,
+    { "CLIENT_FLOAT", NULL, 0, 1, 1, -1, -2, -2, -1,
       -1 }, /* window centered; sizing defered back to wayland client */
 };
 
@@ -114,7 +83,7 @@ static const struct xkb_rule_names xkb_rules = {
 };
 
 static const int repeat_rate = 25;
-static const int repeat_delay = 225;
+static const int repeat_delay = 200;
 
 /* Trackpad */
 static const int tap_to_click = 1;
@@ -232,25 +201,33 @@ static Key keys[] = {
 
     /* VANITYGAPS PATCH KEYS */
 
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_greater, incgaps, { .i = +8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_less, incgaps, { .i = -8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_L, incogaps, { .i = +8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_H, incogaps, { .i = -8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_J, incigaps, { .i = +8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_K, incigaps, { .i = -8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, togglegaps, { 0 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, defaultgaps, { 0 } },
-    // { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1
-    // } }, { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i
-    // = -1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incivgaps,
-    // {.i = +1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o, incivgaps, {.i =
-    // -1 } }, {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_minus, incohgaps, {.i =
-    // +8}}, {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_equal, incohgaps, {.i =
-    // -8}}, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps, {.i =
-    // +1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incovgaps, {.i
-    // = -1 } },
+    { MODKEY, XKB_KEY_equal, incogaps, { .i = +8 } },
+    { MODKEY, XKB_KEY_minus, incogaps, { .i = -8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_plus, incigaps, { .i = +8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_underscore, incigaps, { .i = -8 } },
+    { MODKEY, XKB_KEY_g, togglegaps, { 0 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, defaultgaps, { 0 } },
 
     /* VANITYGAPS PATCH KEYS END */
+
+    /* CLIENT OPACITY KEYS */
+    { MODKEY | WLR_MODIFIER_CTRL,
+      XKB_KEY_i,
+      setopacityunfocus,
+      { .f = +0.1f } },
+    { MODKEY | WLR_MODIFIER_CTRL,
+      XKB_KEY_o,
+      setopacityunfocus,
+      { .f = -0.1f } },
+    { MODKEY | WLR_MODIFIER_CTRL | WLR_MODIFIER_SHIFT,
+      XKB_KEY_I,
+      setopacityfocus,
+      { .f = +0.1f } },
+    { MODKEY | WLR_MODIFIER_CTRL | WLR_MODIFIER_SHIFT,
+      XKB_KEY_O,
+      setopacityfocus,
+      { .f = -0.1f } },
+    /* CLIENT OPACITY KEYS END */
 
     // media control
     { 0, XKB_KEY_XF86AudioMute, spawn, { .v = mute } },
@@ -261,15 +238,15 @@ static Key keys[] = {
     { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_S, tag, { .ui = ~0 } },
     { MODKEY, XKB_KEY_comma, focusmon, { .i = WLR_DIRECTION_LEFT } },
     { MODKEY, XKB_KEY_period, focusmon, { .i = WLR_DIRECTION_RIGHT } },
-    // {MODKEY | WLR_MODIFIER_SHIFT,
-    //  XKB_KEY_less,
-    //  tagmon,
-    //  {.i = WLR_DIRECTION_LEFT}},
+    { MODKEY | WLR_MODIFIER_SHIFT,
+      XKB_KEY_less,
+      tagmon,
+      { .i = WLR_DIRECTION_LEFT } },
 
-    // {MODKEY | WLR_MODIFIER_SHIFT,
-    //  XKB_KEY_greater,
-    //  tagmon,
-    //  {.i = WLR_DIRECTION_RIGHT}},
+    { MODKEY | WLR_MODIFIER_SHIFT,
+      XKB_KEY_greater,
+      tagmon,
+      { .i = WLR_DIRECTION_RIGHT } },
     TAGKEYS (XKB_KEY_1, XKB_KEY_exclam, 0),
     TAGKEYS (XKB_KEY_2, XKB_KEY_at, 1),
     TAGKEYS (XKB_KEY_3, XKB_KEY_numbersign, 2),
@@ -282,14 +259,10 @@ static Key keys[] = {
 };
 static Key keys_always[] = {
     { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_q, quit, { 0 } },
-    /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
     { WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT,
       XKB_KEY_Terminate_Server,
       quit,
       { 0 } },
-/* Ctrl-Alt-Fx is used to switch to another VT, if you don't know what a VT is
- * do not remove them.
- */
 #define CHVT(n)                                                               \
     {                                                                         \
         WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_##n,      \
