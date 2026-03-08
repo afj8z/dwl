@@ -33,7 +33,8 @@ static const unsigned int gappov
           /* VANITYGAPS PATCH END */
 
 /* CLIENT OPACITY PATCH */
-static const float default_opacity_unfocus = 0.85f;
+static const float default_opacity_unfocus = 0.90f;
+
 static const float default_opacity_focus = 1.00f;
 
 /* SCENEFX PATCH
@@ -235,23 +236,12 @@ static Key keys[] = {
 
     /* VANITYGAPS PATCH KEYS */
 
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_greater, incgaps, { .i = +8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_less, incgaps, { .i = -8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_L, incogaps, { .i = +8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_H, incogaps, { .i = -8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_J, incigaps, { .i = +8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_K, incigaps, { .i = -8 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, togglegaps, { 0 } },
-    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_parenright, defaultgaps, { 0 } },
-    // { MODKEY,                    XKB_KEY_y,          incihgaps,     {.i = +1
-    // } }, { MODKEY,                    XKB_KEY_o,          incihgaps,     {.i
-    // = -1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incivgaps,
-    // {.i = +1 } }, { MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o, incivgaps, {.i =
-    // -1 } }, {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_minus, incohgaps, {.i =
-    // +8}}, {MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_equal, incohgaps, {.i =
-    // -8}}, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incovgaps, {.i =
-    // +1 } }, { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incovgaps, {.i
-    // = -1 } },
+    { MODKEY, XKB_KEY_equal, incogaps, { .i = +8 } },
+    { MODKEY, XKB_KEY_minus, incogaps, { .i = -8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_plus, incigaps, { .i = +8 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_underscore, incigaps, { .i = -8 } },
+    { MODKEY, XKB_KEY_g, togglegaps, { 0 } },
+    { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_G, defaultgaps, { 0 } },
 
     /* VANITYGAPS PATCH KEYS END */
 
@@ -283,15 +273,15 @@ static Key keys[] = {
     { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_S, tag, { .ui = ~0 } },
     { MODKEY, XKB_KEY_comma, focusmon, { .i = WLR_DIRECTION_LEFT } },
     { MODKEY, XKB_KEY_period, focusmon, { .i = WLR_DIRECTION_RIGHT } },
-    // {MODKEY | WLR_MODIFIER_SHIFT,
-    //  XKB_KEY_less,
-    //  tagmon,
-    //  {.i = WLR_DIRECTION_LEFT}},
+    { MODKEY | WLR_MODIFIER_SHIFT,
+      XKB_KEY_less,
+      tagmon,
+      { .i = WLR_DIRECTION_LEFT } },
 
-    // {MODKEY | WLR_MODIFIER_SHIFT,
-    //  XKB_KEY_greater,
-    //  tagmon,
-    //  {.i = WLR_DIRECTION_RIGHT}},
+    { MODKEY | WLR_MODIFIER_SHIFT,
+      XKB_KEY_greater,
+      tagmon,
+      { .i = WLR_DIRECTION_RIGHT } },
     TAGKEYS (XKB_KEY_1, XKB_KEY_exclam, 0),
     TAGKEYS (XKB_KEY_2, XKB_KEY_at, 1),
     TAGKEYS (XKB_KEY_3, XKB_KEY_numbersign, 2),
@@ -304,14 +294,10 @@ static Key keys[] = {
 };
 static Key keys_always[] = {
     { MODKEY | WLR_MODIFIER_SHIFT, XKB_KEY_q, quit, { 0 } },
-    /* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
     { WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT,
       XKB_KEY_Terminate_Server,
       quit,
       { 0 } },
-/* Ctrl-Alt-Fx is used to switch to another VT, if you don't know what a VT is
- * do not remove them.
- */
 #define CHVT(n)                                                               \
     {                                                                         \
         WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_##n,      \

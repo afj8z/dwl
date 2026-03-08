@@ -2050,6 +2050,7 @@ focusclient (Client *c, int lift)
             wl_list_insert (&fstack, &c->flink);
             selmon = c->mon;
             c->isurgent = 0;
+            c->opacity = c->opacity_focus;
 
             /* Don't change border color if there is an exclusive focus or we
              * are handling a drag operation */
@@ -2083,15 +2084,16 @@ focusclient (Client *c, int lift)
                      * as this causes issues with winecfg and probably other
                      * clients */
                 }
-            else if (old_c && !client_is_unmanaged (old_c)
-                     && (!c || !client_wants_focus (c)))
+            else if (old_c && !client_is_unmanaged (old_c))
                 {
                     client_set_border_color (old_c, bordercolor);
 
                     update_client_focus_decorations (old_c, 0, 0);
 
-                    client_activate_surface (old, 0);
                     old_c->opacity = old_c->opacity_unfocus;
+
+                    if (!c || !client_wants_focus (c))
+                        client_activate_surface (old, 0);
                 }
         }
     printstatus ();
