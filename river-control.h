@@ -12,6 +12,12 @@ void setborderpx (const Arg *);
 void setfocuscolor (const Arg *);
 void setbordercolor (const Arg *);
 void seturgentcolor (const Arg *);
+void toggleopacity (const Arg *);
+void setopacityfocus_global (const Arg *);
+void setopacityunfocus_global (const Arg *);
+void get_info (const Arg *);
+void query_info (const Arg *);
+char *zriver_command_output_buffer = NULL;
 struct wl_list arg_str_store;
 struct wl_list rule_str_store;
 struct wl_list rules_list;
@@ -79,6 +85,12 @@ struct Func_str_type_pair Func_str_type_pair_list[] = {
     STR (setfocuscolor, FUNC_STR_ARG_TYPE_COLOR),
     STR (setbordercolor, FUNC_STR_ARG_TYPE_COLOR),
     STR (seturgentcolor, FUNC_STR_ARG_TYPE_COLOR),
+    { setopacityfocus_global, FUNC_STR_ARG_TYPE_FLOAT, "set-opacity-focus" },
+    { setopacityunfocus_global, FUNC_STR_ARG_TYPE_FLOAT,
+      "set-opacity-unfocus" },
+    { toggleopacity, FUNC_STR_ARG_TYPE_NONE, "toggle-opacity" },
+    { get_info, FUNC_STR_ARG_TYPE_STRING_ARRAY, "get" },
+    { query_info, FUNC_STR_ARG_TYPE_STRING_ARRAY, "query" },
     STR (setborderpx, FUNC_STR_ARG_TYPE_UINT),
     STR (setlayout, FUNC_STR_ARG_TYPE_LAYOUT),
     STR (spawn, FUNC_STR_ARG_TYPE_STRING_ARRAY),
@@ -212,6 +224,53 @@ seturgentcolor (const Arg *arg)
         {
             urgentcolor[i] = color[i];
         }
+}
+
+void
+toggleopacity (const Arg *arg)
+{
+    opacity_enabled = !opacity_enabled;
+    /* rendermon will apply the changes on next frame */
+}
+
+void
+setopacityfocus_global (const Arg *arg)
+{
+    Client *c;
+    float val = arg->f;
+    if (val < 0.1f)
+        val = 0.1f;
+    if (val > 1.0f)
+        val = 1.0f;
+
+    wl_list_for_each (c, &clients, link)
+    {
+        c->opacity_focus = val;
+        if (c == focustop (c->mon))
+            {
+                c->opacity = val;
+            }
+    }
+}
+
+void
+setopacityunfocus_global (const Arg *arg)
+{
+    Client *c;
+    float val = arg->f;
+    if (val < 0.1f)
+        val = 0.1f;
+    if (val > 1.0f)
+        val = 1.0f;
+
+    wl_list_for_each (c, &clients, link)
+    {
+        c->opacity_unfocus = val;
+        if (c != focustop (c->mon))
+            {
+                c->opacity = val;
+            }
+    }
 }
 
 void
@@ -702,7 +761,7 @@ zriver_control_add_argument (struct wl_client *client,
                 }
             else if (args->argc > 1 && args->argc < STR_LINK_ARRAY_SIZE
                      && args->key_arg_type == FUNC_STR_ARG_TYPE_STRING_ARRAY
-                     && args->p.kl->key->arg.v != NULL)
+                     && args->p.fa->arg.v != NULL)
                 {
                     append_str_store ((char **)args->p.fa->arg.v, argument,
                                       args->argc - 1);
@@ -976,9 +1035,20 @@ zriver_control_run_command (struct wl_client *client,
                 {
                     if (args->p.fa->func != NULL)
                         {
+                            zriver_command_output_buffer = NULL;
                             args->p.fa->func (&args->p.fa->arg);
-                            zriver_command_callback_v1_send_success (
-                                callback_interface, "command success!");
+                            if (zriver_command_output_buffer != NULL)
+                                {
+                                    zriver_command_callback_v1_send_success (
+                                        callback_interface, zriver_command_output_buffer);
+                                    free (zriver_command_output_buffer);
+                                    zriver_command_output_buffer = NULL;
+                                }
+                            else
+                                {
+                                    zriver_command_callback_v1_send_success (
+                                        callback_interface, "command success!");
+                                }
                         }
                     else
                         {

@@ -27,9 +27,12 @@ dwl.o: dwl.c client.h config.h config.mk cursor-shape-v1-protocol.h \
 	dwlctl dwl-ipc-unstable-v2-protocol.h
 util.o: util.c util.h
 #if there is a cleaner way of doing this please inform me this looks a little ugly
-dwlctl: river-control-unstable-v1-client-protocol.h river-control-unstable-v1-private-protocol.c river-control-unstable-v1-private-protocol.o dwlctl.c
-	$(CC) -c -o $@.o dwlctl.c 
-	$(CC) -lwayland-client -o $@ dwlctl.o river-control-unstable-v1-private-protocol.o
+dwlctl.o: dwlctl.c river-control-unstable-v1-client-protocol.h dwl-ipc-unstable-v2-client-protocol.h
+	$(CC) -c -o $@ dwlctl.c 
+
+dwlctl: dwlctl.o river-control-unstable-v1-private-protocol.o dwl-ipc-unstable-v2-protocol.o
+	$(CC) -lwayland-client -o $@ dwlctl.o river-control-unstable-v1-private-protocol.o dwl-ipc-unstable-v2-protocol.o
+
 dwl-ipc-unstable-v2-protocol.o: dwl-ipc-unstable-v2-protocol.c dwl-ipc-unstable-v2-protocol.h
 
 # wayland-scanner is a tool which generates C headers and rigging for Wayland
@@ -47,8 +50,11 @@ river-control-unstable-v1-protocol.h:
 river-control-unstable-v1-private-protocol.c:
 	$(WAYLAND_SCANNER) private-code \
 		protocols/river-control-unstable-v1.xml  $@
-river-control-unstable-v1-private-protocol.o:
+river-control-unstable-v1-private-protocol.o: river-control-unstable-v1-private-protocol.c
 	$(CC) -c -o $@ river-control-unstable-v1-private-protocol.c
+dwl-ipc-unstable-v2-client-protocol.h:
+	$(WAYLAND_SCANNER) client-header \
+		protocols/dwl-ipc-unstable-v2.xml $@
 cursor-shape-v1-protocol.h:
 	$(WAYLAND_SCANNER) enum-header \
 		$(WAYLAND_PROTOCOLS)/staging/cursor-shape/cursor-shape-v1.xml $@

@@ -204,12 +204,7 @@ static inline int client_is_float_type(Client *c) {
 
     for (i = 0; i < surface->window_type_len; i++) {
       type = &surface->window_type[i];
-      /* Try xwayland->xwm->atoms if xwayland->atoms fails (0.19 headers) */
-      if (*type == xwayland->xwm->atoms.net_wm_window_type_dialog ||
-          *type == xwayland->xwm->atoms.net_wm_window_type_splash ||
-          *type == xwayland->xwm->atoms.net_wm_window_type_toolbar ||
-          *type == xwayland->xwm->atoms.net_wm_window_type_utility)
-        return 1;
+      if (surface->modal) return 1;
     }
 
     return size_hints && size_hints->min_width > 0 &&

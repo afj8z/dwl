@@ -467,6 +467,7 @@ static void zoom (const Arg *arg);
 static pid_t child_pid = -1;
 static int locked;
 static void *exclusive_focus;
+static int opacity_enabled = 1;
 static struct wl_display *dpy;
 static struct wl_event_loop *event_loop;
 static struct wlr_backend *backend;
@@ -2991,7 +2992,8 @@ scenebuffersetopacity (struct wlr_scene_buffer *buffer, int sx, int sy,
     Client *c = data;
     /* xdg-popups are children of Client.scene, we do not have to worry about
      * messing with them. */
-    wlr_scene_buffer_set_opacity (buffer, c->isfullscreen ? 1 : c->opacity);
+    wlr_scene_buffer_set_opacity (
+        buffer, (!opacity_enabled || c->isfullscreen) ? 1 : c->opacity);
 }
 
 void
@@ -4090,6 +4092,193 @@ xwaylandready (struct wl_listener *listener, void *data)
             xcursor->images[0]->hotspot_y);
 }
 #endif
+
+static void
+append_output (const char *fmt, ...)
+{
+    int size;
+    va_list ap;
+    va_start (ap, fmt);
+    size = vsnprintf (NULL, 0, fmt, ap);
+    va_end (ap);
+
+    if (size < 0)
+        return;
+
+    if (zriver_command_output_buffer == NULL)
+        {
+            zriver_command_output_buffer = malloc (size + 1);
+            if (zriver_command_output_buffer)
+                {
+                    va_start (ap, fmt);
+                    vsnprintf (zriver_command_output_buffer, size + 1, fmt,
+                               ap);
+                    va_end (ap);
+                }
+        }
+    else
+        {
+            size_t old_len = strlen (zriver_command_output_buffer);
+            char *new_buf
+                = realloc (zriver_command_output_buffer, old_len + size + 1);
+            if (new_buf)
+                {
+                    zriver_command_output_buffer = new_buf;
+                    va_start (ap, fmt);
+                    vsnprintf (zriver_command_output_buffer + old_len,
+                               size + 1, fmt, ap);
+                    va_end (ap);
+                }
+        }
+}
+
+void
+get_info (const Arg *arg)
+{
+    char **args;
+    int i;
+    Client *c;
+    Monitor *m;
+
+    if (!arg || !arg->v)
+        {
+            append_output ("error: missing argument for get");
+            return;
+        }
+    args = (char **)arg->v;
+    if (!args[0])
+        {
+            append_output ("error: missing argument for get");
+            return;
+        }
+
+    if (strcmp (args[0], "tags") == 0)
+        {
+            append_output ("Tags:\n");
+            for (i = 0; i < TAGCOUNT; i++)
+                {
+                    append_output ("Tag %d: mask %u\n", i + 1, 1 << i);
+                }
+        }
+    else if (strcmp (args[0], "clients") == 0)
+        {
+            append_output ("Clients:\n");
+            wl_list_for_each (c, &clients, link)
+            {
+                append_output ("- ID: %p, AppID: %s, Title: %s, Tags: %u\n", c,
+                               client_get_appid (c), client_get_title (c),
+                               c->tags);
+            }
+        }
+    else if (strcmp (args[0], "master") == 0)
+        {
+            append_output ("Master Info:\n");
+            wl_list_for_each (m, &mons, link)
+            {
+                append_output ("Monitor: %s\n", m->wlr_output->name);
+                append_output ("  Selected Tags: %u\n", m->tagset[m->seltags]);
+                append_output ("  Layout: %s\n", m->ltsymbol);
+                wl_list_for_each (c, &clients, link)
+                {
+                    if (c->mon == m)
+                        {
+                            append_output (
+                                "  Client: %p, AppID: %s, Title: %s, Tags: %u\n",
+                                c, client_get_appid (c), client_get_title (c),
+                                c->tags);
+                        }
+                }
+            }
+        }
+    else
+        {
+            append_output ("error: unknown get argument '%s'", args[0]);
+        }
+}
+
+void
+query_info (const Arg *arg)
+{
+    char **args;
+    int tag_idx;
+    uint32_t tag_mask;
+    Client *c;
+    Monitor *m;
+    char ptr_str[32];
+
+    if (!arg || !arg->v)
+        {
+            append_output ("error: missing argument for query");
+            return;
+        }
+    args = (char **)arg->v;
+    if (!args[0] || !args[1])
+        {
+            append_output ("error: query requires <type> <id>");
+            return;
+        }
+
+    if (strcmp (args[0], "tag") == 0)
+        {
+            tag_idx = atoi (args[1]);
+            tag_mask = 1 << (tag_idx - 1);
+            append_output ("Tag %d (mask %u):\n", tag_idx, tag_mask);
+            wl_list_for_each (c, &clients, link)
+            {
+                if (c->tags & tag_mask)
+                    {
+                        append_output ("  Client: %p, AppID: %s, Title: %s\n",
+                                       c, client_get_appid (c),
+                                       client_get_title (c));
+                    }
+            }
+        }
+    else if (strcmp (args[0], "display") == 0)
+        {
+            wl_list_for_each (m, &mons, link)
+            {
+                if (strcmp (m->wlr_output->name, args[1]) == 0)
+                    {
+                        append_output ("Display: %s\n", m->wlr_output->name);
+                        append_output ("  Selected Tags: %u\n",
+                                       m->tagset[m->seltags]);
+                        append_output ("  Layout: %s\n", m->ltsymbol);
+                        append_output ("  Master fact: %f\n", m->mfact);
+                        append_output ("  Master windows: %d\n", m->nmaster);
+                        return;
+                    }
+            }
+            append_output ("error: display '%s' not found", args[1]);
+        }
+    else if (strcmp (args[0], "client") == 0)
+        {
+            wl_list_for_each (c, &clients, link)
+            {
+                snprintf (ptr_str, sizeof (ptr_str), "%p", (void *)c);
+                if (strcmp (ptr_str, args[1]) == 0
+                    || (client_get_appid (c)
+                        && strcmp (client_get_appid (c), args[1]) == 0))
+                    {
+                        append_output ("Client: %p\n", c);
+                        append_output ("  AppID: %s\n", client_get_appid (c));
+                        append_output ("  Title: %s\n", client_get_title (c));
+                        append_output ("  Tags: %u\n", c->tags);
+                        append_output ("  Floating: %d\n", c->isfloating);
+                        append_output ("  Fullscreen: %d\n", c->isfullscreen);
+                        append_output ("  Urgent: %d\n", c->isurgent);
+                        if (c->mon)
+                            append_output ("  Monitor: %s\n",
+                                           c->mon->wlr_output->name);
+                        return;
+                    }
+            }
+            append_output ("error: client '%s' not found", args[1]);
+        }
+    else
+        {
+            append_output ("error: unknown query type '%s'", args[0]);
+        }
+}
 
 int
 main (int argc, char *argv[])
